@@ -16,6 +16,43 @@ type StubScheduleRepository struct {
 	eventData    map[string]domain.ScheduleEventResponse
 }
 
+func hasGroupInCatalog(node domain.GroupCatalogNode, groupID string) bool {
+	if node.NodeType == "group" && node.UUID == groupID {
+		return true
+	}
+
+	for _, child := range node.Children {
+		if hasGroupInCatalog(child, groupID) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func pruneCatalogToKnownGroups(node domain.GroupCatalogNode, validGroupIDs map[string]struct{}) (domain.GroupCatalogNode, bool) {
+	prunedChildren := make([]domain.GroupCatalogNode, 0, len(node.Children))
+	for _, child := range node.Children {
+		prunedChild, keep := pruneCatalogToKnownGroups(child, validGroupIDs)
+		if keep {
+			prunedChildren = append(prunedChildren, prunedChild)
+		}
+	}
+	node.Children = prunedChildren
+
+	if node.NodeType == "group" {
+		_, keep := validGroupIDs[node.UUID]
+		return node, keep
+	}
+
+	// Keep non-group nodes only when they still contain at least one valid group.
+	if len(node.Children) > 0 {
+		return node, true
+	}
+
+	return node, false
+}
+
 func NewStubScheduleRepository(dataDir string) (*StubScheduleRepository, error) {
 	groupCatalogPath := filepath.Join(dataDir, "schedule_ID.json")
 	groupSchedulePath := filepath.Join(dataDir, "schedule_group.json")
@@ -51,6 +88,34 @@ func NewStubScheduleRepository(dataDir string) (*StubScheduleRepository, error) 
 	for index, event := range groupSchedule.Data.Schedule {
 		eventID := fmt.Sprintf("event-%d", index+1)
 		repo.eventData[eventID] = domain.ScheduleEventResponse{Data: event}
+	}
+
+	// The stub catalog and stub schedule files can be out of sync.
+	// Ensure every group with available schedule is present in group catalog.
+	for groupID, schedule := range repo.groupData {
+		if hasGroupInCatalog(repo.groupCatalog.Data, groupID) {
+			continue
+		}
+
+		repo.groupCatalog.Data.Children = append(
+			repo.groupCatalog.Data.Children,
+			domain.GroupCatalogNode{
+				Abbr:       schedule.Data.Title,
+				Name:       schedule.Data.Title,
+				UUID:       groupID,
+				NodeType:   "group",
+				ParentUUID: repo.groupCatalog.Data.UUID,
+			},
+		)
+	}
+
+	validGroupIDs := make(map[string]struct{}, len(repo.groupData))
+	for groupID := range repo.groupData {
+		validGroupIDs[groupID] = struct{}{}
+	}
+
+	if prunedRoot, ok := pruneCatalogToKnownGroups(repo.groupCatalog.Data, validGroupIDs); ok {
+		repo.groupCatalog.Data = prunedRoot
 	}
 
 	return repo, nil
