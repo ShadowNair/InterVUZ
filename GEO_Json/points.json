@@ -1,0 +1,505 @@
+
+{
+    "id": "place_100",
+    "name": "Аудитория 100",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 4.5,
+        "y": 18.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "place_102",
+    "name": "Аудитория 102",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 6.0,
+        "y": 18.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "place_105",
+    "name": "Аудитория 105",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 10.0,
+        "y": 14.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": false
+},
+{
+    "id": "place_106",
+    "name": "Аудитория 106",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 18.0,
+        "y": 22.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "place_106a",
+    "name": "Аудитория 106а",
+    "type": "classroom",
+    "description": "Малая учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 19.5,
+        "y": 22.0
+    },
+    "tags": [
+        "lecture",
+        "small"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "place_109",
+    "name": "Аудитория 109",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 12.0,
+        "y": 10.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "place_109a",
+    "name": "Аудитория 109а",
+    "type": "classroom",
+    "description": "Малая учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 13.0,
+        "y": 10.0
+    },
+    "tags": [
+        "lecture",
+        "small"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "place_109b",
+    "name": "Аудитория 109б",
+    "type": "classroom",
+    "description": "Малая учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 14.0,
+        "y": 10.0
+    },
+    "tags": [
+        "lecture",
+        "small"
+    ],
+    "isAccessible": false
+},
+{
+    "id": "place_114",
+    "name": "Аудитория 114",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 18.0,
+        "y": 24.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "place_115",
+    "name": "Аудитория 115",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 12.0,
+        "y": 12.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "place_116",
+    "name": "Аудитория 116",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 19.5,
+        "y": 24.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "place_117",
+    "name": "Аудитория 117",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 14.0,
+        "y": 16.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": false
+},
+{
+    "id": "place_118",
+    "name": "Аудитория 118",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 21.0,
+        "y": 24.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "place_119",
+    "name": "Аудитория 119",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 14.0,
+        "y": 18.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "place_120",
+    "name": "Аудитория 120",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 22.5,
+        "y": 24.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": false
+},
+{
+    "id": "place_121",
+    "name": "Аудитория 121",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 10.0,
+        "y": 20.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "place_122",
+    "name": "Аудитория 122",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 8.0,
+        "y": 24.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "place_125",
+    "name": "Аудитория 125",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 8.0,
+        "y": 20.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": false
+},
+{
+    "id": "place_127",
+    "name": "Аудитория 127",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 6.0,
+        "y": 16.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "place_133",
+    "name": "Аудитория 133",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 4.0,
+        "y": 12.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "place_135",
+    "name": "Аудитория 135",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 5.5,
+        "y": 12.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "place_137",
+    "name": "Аудитория 137",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 4.0,
+        "y": 10.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": false
+},
+{
+    "id": "place_139",
+    "name": "Аудитория 139",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 7.0,
+        "y": 12.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "place_141",
+    "name": "Аудитория 141",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 5.5,
+        "y": 10.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "place_143",
+    "name": "Аудитория 143",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 7.0,
+        "y": 10.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": false
+},
+{
+    "id": "place_145",
+    "name": "Аудитория 145",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 8.5,
+        "y": 10.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "place_147",
+    "name": "Аудитория 147",
+    "type": "classroom",
+    "description": "Учебная аудитория",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 10.0,
+        "y": 12.0
+    },
+    "tags": [
+        "lecture"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "stairs_main_1",
+    "name": "Лестница главная",
+    "type": "staircase",
+    "description": "Основная лестница между этажами",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 11.0,
+        "y": 16.0
+    },
+    "tags": [
+        "stairs",
+        "main"
+    ],
+    "isAccessible": false
+},
+{
+    "id": "stairs_side_1",
+    "name": "Лестница боковая",
+    "type": "staircase",
+    "description": "Боковая служебная лестница",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 3.0,
+        "y": 14.0
+    },
+    "tags": [
+        "stairs",
+        "service"
+    ],
+    "isAccessible": false
+},
+{
+    "id": "stairs_emergency_1",
+    "name": "Лестница аварийная",
+    "type": "staircase",
+    "description": "Аварийный выход",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 23.0,
+        "y": 18.0
+    },
+    "tags": [
+        "stairs",
+        "emergency",
+        "exit"
+    ],
+    "isAccessible": true
+},
+{
+    "id": "cloakroom_1",
+    "name": "Гардероб",
+    "type": "service",
+    "description": "Основной гардероб",
+    "coordinates": {
+        "building": "1",
+        "floor": 1,
+        "x": 9.0,
+        "y": 22.0
+    },
+    "tags": [
+        "cloakroom",
+        "service"
+    ],
+    "isAccessible": true
+}
