@@ -17,6 +17,6 @@ COPY --from=builder /intervuz /usr/local/bin/intervuz
 COPY --from=builder /app/schedule /app/schedule
 COPY --from=builder /app/swagger.yaml /app/swagger.yaml
 
-EXPOSE 8080
+EXPOSE 8000
 
 CMD ["intervuz"]

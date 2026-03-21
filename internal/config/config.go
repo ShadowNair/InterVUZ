@@ -10,7 +10,7 @@ type Config struct {
 func Load() Config {
 	port := os.Getenv("HTTP_PORT")
 	if port == "" {
-		port = "8080"
+		port = "8000"
 	}
 
 	rootImagePath := os.Getenv("ROOT_IMAGE_PATH")
