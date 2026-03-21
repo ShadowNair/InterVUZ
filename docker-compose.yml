@@ -9,14 +9,14 @@ services:
     depends_on:
       - postgres
     environment:
-      HTTP_PORT: "8080"
+      HTTP_PORT: "8000"
       DB_HOST: postgres
       DB_PORT: "5432"
       DB_NAME: intervuz
       DB_USER: intervuz
       DB_PASSWORD: intervuz
     ports:
-      - "8080:8080"
+      - "8000:8000"
     restart: unless-stopped
 
   postgres:
