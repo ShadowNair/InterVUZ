@@ -44,7 +44,7 @@ func main() {
 	mux.HandleFunc("/places", placeHTTPHandler.List)
 	mux.HandleFunc("/places/", placeHTTPHandler.GetByID)
 	mux.HandleFunc("/routes", routeHTTPHandler.Build)
-	mux.HandleFunc("/schedule/import", scheduleHTTPHandler.Import)
+	mux.HandleFunc("/admin/schedule/import", scheduleHTTPHandler.Import)
 	mux.HandleFunc("/users/schedule/groups", scheduleHTTPHandler.GetGroups)
 	mux.HandleFunc("/users/schedule/events/", scheduleHTTPHandler.GetEvent)
 	mux.HandleFunc("/users/schedule/", scheduleHTTPHandler.GetGroupSchedule)

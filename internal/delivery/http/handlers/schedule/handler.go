@@ -1,9 +1,12 @@
 package schedule
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/handlers/common"
 	"github.com/GIT_USER_ID/GIT_REPO_ID/internal/domain"
@@ -19,10 +22,12 @@ func NewHandler(useCase *usecase.ScheduleUseCase) *Handler {
 }
 
 func (h *Handler) Import(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/schedule/import" {
+	// Исправленный путь (без ведущего слеша, если mux настроен так)
+	if r.URL.Path != "/admin/schedule/import" && r.URL.Path != "admin/schedule/import" {
 		http.NotFound(w, r)
 		return
 	}
+	
 	if r.Method != http.MethodPost {
 		common.WriteMethodNotAllowed(w)
 		return
@@ -34,8 +39,17 @@ func (h *Handler) Import(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := h.useCase.Import(r.Context(), request)
+	// Опционально: добавляем таймаут на всю операцию импорта
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Minute)
+	defer cancel()
+
+	response, err := h.useCase.Import(ctx, request)
 	if err != nil {
+		// Map errors to appropriate HTTP status
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			common.WriteError(w, http.StatusRequestTimeout, "timeout", "import operation timed out")
+			return
+		}
 		common.WriteDomainError(w, err)
 		return
 	}

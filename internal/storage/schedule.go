@@ -4,13 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/GIT_USER_ID/GIT_REPO_ID/internal/domain"
 )
 
 type StubScheduleRepository struct {
+	basePath   string 
 	groupCatalog domain.GroupCatalogResponse
 	groupData    map[string]domain.GroupScheduleResponse
 	eventData    map[string]domain.ScheduleEventResponse
@@ -78,6 +82,7 @@ func NewStubScheduleRepository(dataDir string) (*StubScheduleRepository, error) 
 	}
 
 	repo := &StubScheduleRepository{
+		basePath: dataDir,
 		groupCatalog: catalog,
 		groupData: map[string]domain.GroupScheduleResponse{
 			groupSchedule.Data.UUID: groupSchedule,
@@ -121,11 +126,49 @@ func NewStubScheduleRepository(dataDir string) (*StubScheduleRepository, error) 
 	return repo, nil
 }
 
-func (r *StubScheduleRepository) Import(_ context.Context, request domain.ScheduleImportRequest) (*domain.ScheduleImportResult, error) {
+func (r *StubScheduleRepository) Import(ctx context.Context, request domain.ScheduleImportRequest) (*domain.ScheduleImportResult, error) {
+	inputPath := filepath.Join(r.basePath, "schedule_ID.json")
+	
+	// 1. Читаем иерархию групп
+	data, err := os.ReadFile(inputPath)
+	if err != nil {
+		return nil, fmt.Errorf("read hierarchy file: %w", err)
+	}
+
+	var root domain.GroupCatalogResponse
+	if err := json.Unmarshal(data, &root); err != nil {
+		return nil, fmt.Errorf("parse hierarchy JSON: %w", err)
+	}
+
+	// 2. Собираем UUID групп
+	var groupUUIDs []string
+	collectGroupUUIDs(root.Data, &groupUUIDs)
+
+	client := &http.Client{Timeout: 30 * time.Second}
+	importedCount := 0
+
+	for _, uuid := range groupUUIDs {
+		// Проверяем отмену контекста
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
+
+		if err := r.fetchAndSaveSchedule(ctx, client, uuid); err != nil {
+			// Логируем, но продолжаем загрузку остальных
+			// В продакшене: r.logger.Warn("failed to fetch", "uuid", uuid, "err", err)
+			fmt.Printf("failed to fetch %s: %v\n", uuid, err)
+			continue
+		}
+		importedCount++
+		time.Sleep(100 * time.Millisecond) // rate limiting
+	}
+
 	return &domain.ScheduleImportResult{
-		ImportID:       "import-stub-001",
-		Status:         "queued",
-		ImportedEvents: len(request.Events),
+		ImportID:       fmt.Sprintf("import-%d", time.Now().Unix()),
+		Status:         "completed",
+		ImportedEvents: importedCount,
 	}, nil
 }
 
@@ -152,4 +195,61 @@ func (r *StubScheduleRepository) GetEvent(_ context.Context, eventID string) (*d
 
 	response := event
 	return &response, nil
+}
+
+func collectGroupUUIDs(node domain.GroupCatalogNode, result *[]string) {
+	if node.NodeType == "group" && node.UUID != "" {
+		*result = append(*result, node.UUID)
+	}
+	for _, child := range node.Children {
+		collectGroupUUIDs(child, result)
+	}
+}
+
+// fetchAndSaveSchedule загружает расписание по UUID и сохраняет в файл
+func (r *StubScheduleRepository) fetchAndSaveSchedule(ctx context.Context, client *http.Client, uuid string) error {
+	url := fmt.Sprintf("https://lks.bmstu.ru/lks-back/srv/v2/ics/%s", uuid)
+	
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return fmt.Errorf("create request: %w", err)
+	}
+
+	// Если нужна авторизация — раскомментируйте и добавьте токен
+	// req.Header.Set("Authorization", "Bearer YOUR_TOKEN_HERE")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("http request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("bad status %d: %s", resp.StatusCode, string(body))
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("read response: %w", err)
+	}
+
+	// Сохраняем в файл schedule_{uuid}.json
+	outputPath := filepath.Join(r.basePath, fmt.Sprintf("schedule_%s.json", uuid))
+	if err := os.WriteFile(outputPath, body, 0644); err != nil {
+		return fmt.Errorf("write file: %w", err)
+	}
+
+	// Опционально: обновляем in-memory кеш, чтобы новые данные были доступны сразу
+	var schedule domain.GroupScheduleResponse
+	if err := json.Unmarshal(body, &schedule); err == nil {
+		r.groupData[uuid] = schedule
+		// Обновляем eventData для новых событий
+		for index, event := range schedule.Data.Schedule {
+			eventID := fmt.Sprintf("event-%s-%d", uuid, index+1)
+			r.eventData[eventID] = domain.ScheduleEventResponse{Data: event}
+		}
+	}
+
+	return nil
 }
