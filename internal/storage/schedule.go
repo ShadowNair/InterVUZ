@@ -57,18 +57,83 @@ func pruneCatalogToKnownGroups(node domain.GroupCatalogNode, validGroupIDs map[s
 	return node, false
 }
 
+// func NewStubScheduleRepository(dataDir string) (*StubScheduleRepository, error) {
+// 	groupCatalogPath := filepath.Join(dataDir, "schedule_ID.json")
+// 	groupSchedulePath := filepath.Join(dataDir, "schedule_group.json")
+
+// 	groupCatalogBytes, err := os.ReadFile(groupCatalogPath)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("read group catalog stub: %w", err)
+// 	}
+
+// 	groupScheduleBytes, err := os.ReadFile(groupSchedulePath)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("read group schedule stub: %w", err)
+// 	}
+
+// 	var catalog domain.GroupCatalogResponse
+// 	if err := json.Unmarshal(groupCatalogBytes, &catalog); err != nil {
+// 		return nil, fmt.Errorf("decode group catalog stub: %w", err)
+// 	}
+
+// 	var groupSchedule []domain.GroupScheduleResponse
+// 	if err := json.Unmarshal(groupScheduleBytes, &groupSchedule); err != nil {
+// 		return nil, fmt.Errorf("decode group schedule stub: %w", err)
+// 	}
+
+// 	repo := &StubScheduleRepository{
+// 		basePath: dataDir,
+// 		groupCatalog: catalog,
+// 		groupData: map[string]domain.GroupScheduleResponse{
+// 			groupSchedule.Data.UUID: groupSchedule,
+// 		},
+// 		eventData: make(map[string]domain.ScheduleEventResponse),
+// 	}
+
+// 	for index, event := range groupSchedule.Data.Schedule {
+// 		eventID := fmt.Sprintf("event-%d", index+1)
+// 		repo.eventData[eventID] = domain.ScheduleEventResponse{Data: event}
+// 	}
+
+// 	// The stub catalog and stub schedule files can be out of sync.
+// 	// Ensure every group with available schedule is present in group catalog.
+// 	for groupID, schedule := range repo.groupData {
+// 		if hasGroupInCatalog(repo.groupCatalog.Data, groupID) {
+// 			continue
+// 		}
+
+// 		repo.groupCatalog.Data.Children = append(
+// 			repo.groupCatalog.Data.Children,
+// 			domain.GroupCatalogNode{
+// 				Abbr:       schedule.Data.Title,
+// 				Name:       schedule.Data.Title,
+// 				UUID:       groupID,
+// 				NodeType:   "group",
+// 				ParentUUID: repo.groupCatalog.Data.UUID,
+// 			},
+// 		)
+// 	}
+
+// 	validGroupIDs := make(map[string]struct{}, len(repo.groupData))
+// 	for groupID := range repo.groupData {
+// 		validGroupIDs[groupID] = struct{}{}
+// 	}
+
+// 	if prunedRoot, ok := pruneCatalogToKnownGroups(repo.groupCatalog.Data, validGroupIDs); ok {
+// 		repo.groupCatalog.Data = prunedRoot
+// 	}
+
+// 	return repo, nil
+// }
+
 func NewStubScheduleRepository(dataDir string) (*StubScheduleRepository, error) {
 	groupCatalogPath := filepath.Join(dataDir, "schedule_ID.json")
 	groupSchedulePath := filepath.Join(dataDir, "schedule_group.json")
 
+	// Читаем каталог групп
 	groupCatalogBytes, err := os.ReadFile(groupCatalogPath)
 	if err != nil {
 		return nil, fmt.Errorf("read group catalog stub: %w", err)
-	}
-
-	groupScheduleBytes, err := os.ReadFile(groupSchedulePath)
-	if err != nil {
-		return nil, fmt.Errorf("read group schedule stub: %w", err)
 	}
 
 	var catalog domain.GroupCatalogResponse
@@ -76,27 +141,44 @@ func NewStubScheduleRepository(dataDir string) (*StubScheduleRepository, error) 
 		return nil, fmt.Errorf("decode group catalog stub: %w", err)
 	}
 
-	var groupSchedule domain.GroupScheduleResponse
-	if err := json.Unmarshal(groupScheduleBytes, &groupSchedule); err != nil {
+	// Читаем массив расписаний групп
+	groupScheduleBytes, err := os.ReadFile(groupSchedulePath)
+	if err != nil {
+		return nil, fmt.Errorf("read group schedule stub: %w", err)
+	}
+
+	// Распарсиваем как массив []GroupScheduleResponse
+	var groupSchedules []domain.GroupScheduleResponse
+	if err := json.Unmarshal(groupScheduleBytes, &groupSchedules); err != nil {
 		return nil, fmt.Errorf("decode group schedule stub: %w", err)
 	}
 
+	// Инициализируем репозиторий
 	repo := &StubScheduleRepository{
-		basePath: dataDir,
+		basePath:     dataDir,
 		groupCatalog: catalog,
-		groupData: map[string]domain.GroupScheduleResponse{
-			groupSchedule.Data.UUID: groupSchedule,
-		},
-		eventData: make(map[string]domain.ScheduleEventResponse),
+		groupData:    make(map[string]domain.GroupScheduleResponse, len(groupSchedules)),
+		eventData:    make(map[string]domain.ScheduleEventResponse),
 	}
 
-	for index, event := range groupSchedule.Data.Schedule {
-		eventID := fmt.Sprintf("event-%d", index+1)
-		repo.eventData[eventID] = domain.ScheduleEventResponse{Data: event}
+	// Заполняем groupData и eventData из массива расписаний
+	for _, schedule := range groupSchedules {
+		groupUUID := schedule.Data.UUID
+		if groupUUID == "" {
+			continue // пропускаем записи без UUID
+		}
+
+		// Сохраняем расписание группы в кеш
+		repo.groupData[groupUUID] = schedule
+
+		// Сохраняем события этой группы в eventData
+		for index, event := range schedule.Data.Schedule {
+			eventID := fmt.Sprintf("event-%s-%d", groupUUID, index+1)
+			repo.eventData[eventID] = domain.ScheduleEventResponse{Data: event}
+		}
 	}
 
-	// The stub catalog and stub schedule files can be out of sync.
-	// Ensure every group with available schedule is present in group catalog.
+	// Синхронизация каталога: добавляем группы, которых нет в каталоге, но есть расписания
 	for groupID, schedule := range repo.groupData {
 		if hasGroupInCatalog(repo.groupCatalog.Data, groupID) {
 			continue
@@ -114,6 +196,7 @@ func NewStubScheduleRepository(dataDir string) (*StubScheduleRepository, error) 
 		)
 	}
 
+	// Обрезаем каталог: оставляем только те группы, для которых есть расписания
 	validGroupIDs := make(map[string]struct{}, len(repo.groupData))
 	for groupID := range repo.groupData {
 		validGroupIDs[groupID] = struct{}{}
@@ -128,7 +211,7 @@ func NewStubScheduleRepository(dataDir string) (*StubScheduleRepository, error) 
 
 func (r *StubScheduleRepository) Import(ctx context.Context, request domain.ScheduleImportRequest) (*domain.ScheduleImportResult, error) {
 	_ = request
-	const maxGroupsToImport = 6
+	const maxGroupsToImport = 30
 
 	inputPath := filepath.Join(r.basePath, "schedule_ID.json")
 	

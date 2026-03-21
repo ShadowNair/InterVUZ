@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"path/filepath"
 	"time"
 
 	"github.com/GIT_USER_ID/GIT_REPO_ID/internal/config"
@@ -23,7 +22,7 @@ func main() {
 
 	placeRepo := storage.NewStubPlaceRepository()
 	roomRepo := storage.NewStubRoomRepository()
-	scheduleRepo, err := storage.NewStubScheduleRepository(filepath.Join("schedule", "lksJSON"))
+	scheduleRepo, err := storage.NewStubScheduleRepository("schedule/lksJSON")
 	if err != nil {
 		log.Fatalf("init schedule storage: %v", err)
 	}
