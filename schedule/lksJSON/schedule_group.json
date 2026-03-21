@@ -1,0 +1,1360 @@
+{
+    "data": {
+        "link": "https://lks.bmstu.ru/lks-back/srv/v2/ics/bad1f0ec-ed29-11ef-becd-8753117d52b2",
+        "type": "schedule.group",
+        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+        "title": "ИУ1-21Б",
+        "schedule": [
+            {
+                "day": 1,
+                "time": 1,
+                "week": "all",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1-21Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "10:00",
+                "teachers": [
+                    {
+                        "uuid": "0340b3f4-0608-4981-aeeb-28541cdd3fe0",
+                        "lastName": "Велищанский",
+                        "firstName": "Михаил",
+                        "middleName": "Александрович"
+                    }
+                ],
+                "audiences": [
+                    {
+                        "name": "522к",
+                        "uuid": "62e1d542-e7d0-4da0-bdc5-3a631b6f086c",
+                        "building": "B4, B4K ЦК \"Конгресс-холл\"",
+                        "root_uuid": "8c1b7bb8-e690-11db-89c3-000cf1a7cbf0",
+                        "department_uid": null,
+                        "building_id_block": 23,
+                        "building_id_building": 45
+                    }
+                ],
+                "startTime": "08:30",
+                "discipline": {
+                    "abbr": "ИиДУ",
+                    "actType": "seminar",
+                    "fullName": "Интегралы и дифференциальные уравнения",
+                    "shortName": ""
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 0,
+                "endTimeHourNum": 10,
+                "startTimeMinNum": 30,
+                "startTimeHourNum": 8
+            },
+            {
+                "day": 1,
+                "time": 2,
+                "week": "all",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1-21Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "11:40",
+                "teachers": [
+                    {
+                        "uuid": "1db00022-3211-11ee-b82c-005056b16637",
+                        "lastName": "Зозуля",
+                        "firstName": "Ольга",
+                        "middleName": "Александровна"
+                    }
+                ],
+                "audiences": [
+                    {
+                        "name": "520к",
+                        "uuid": "cb585a89-55ca-4f7a-a324-d318dfcd13c0",
+                        "building": "B4, B4K ЦК \"Конгресс-холл\"",
+                        "root_uuid": "8c1b7bb8-e690-11db-89c3-000cf1a7cbf0",
+                        "department_uid": null,
+                        "building_id_block": 23,
+                        "building_id_building": 45
+                    }
+                ],
+                "startTime": "10:10",
+                "discipline": {
+                    "abbr": "ИР",
+                    "actType": "seminar",
+                    "fullName": "История России",
+                    "shortName": "История"
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 40,
+                "endTimeHourNum": 11,
+                "startTimeMinNum": 10,
+                "startTimeHourNum": 10
+            },
+            {
+                "day": 1,
+                "time": 3,
+                "week": "all",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1-21Б,22Б; ИУ3-21Б,22Б,23Б; ИУ3И-21Б,22Б,23Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad86903-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f211-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad491cb-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad35028-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad5db96-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad71dc1-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad5dcd4-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "13:20",
+                "teachers": [
+                    {
+                        "uuid": "0340b3f4-0608-4981-aeeb-28541cdd3fe0",
+                        "lastName": "Велищанский",
+                        "firstName": "Михаил",
+                        "middleName": "Александрович"
+                    }
+                ],
+                "audiences": [
+                    {
+                        "name": "301х",
+                        "uuid": "ac08597d-a00d-48df-935a-3bc1d2ef0874",
+                        "building": "B1 ХимЛаб",
+                        "root_uuid": "8c1b7bb8-e690-11db-89c3-000cf1a7cbf0",
+                        "department_uid": null,
+                        "building_id_block": 16,
+                        "building_id_building": 38
+                    }
+                ],
+                "startTime": "11:50",
+                "discipline": {
+                    "abbr": "ИиДУ",
+                    "actType": "lecture",
+                    "fullName": "Интегралы и дифференциальные уравнения",
+                    "shortName": ""
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 20,
+                "endTimeHourNum": 13,
+                "startTimeMinNum": 50,
+                "startTimeHourNum": 11
+            },
+            {
+                "day": 1,
+                "time": 4,
+                "week": "zn",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1-21Б,22Б; ИУ3-21Б,22Б,23Б; ИУ3И-21Б,22Б,23Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad86903-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f211-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad491cb-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad35028-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad5db96-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad71dc1-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad5dcd4-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "15:35",
+                "teachers": [
+                    {
+                        "uuid": "1698c84e-8cad-4421-b179-cc398ff3aef0",
+                        "lastName": "Божич",
+                        "firstName": "Анатолий",
+                        "middleName": "Станиславович"
+                    }
+                ],
+                "audiences": [
+                    {
+                        "name": "115х",
+                        "uuid": "e7ec1158-a705-4ab9-bd62-a5361d60a175",
+                        "building": "B1 ХимЛаб",
+                        "root_uuid": "8c1b7bb8-e690-11db-89c3-000cf1a7cbf0",
+                        "department_uid": null,
+                        "building_id_block": 16,
+                        "building_id_building": 38
+                    }
+                ],
+                "startTime": "14:05",
+                "discipline": {
+                    "abbr": "ИР",
+                    "actType": "lecture",
+                    "fullName": "История России",
+                    "shortName": "История"
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 35,
+                "endTimeHourNum": 15,
+                "startTimeMinNum": 5,
+                "startTimeHourNum": 14
+            },
+            {
+                "day": 1,
+                "time": 4,
+                "week": "ch",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1Ц-42Б; ИУ1-21Б,22Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "8155605c-bc7e-11ee-b32d-df9b99f124c0"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad86903-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "15:35",
+                "teachers": [
+                    {
+                        "uuid": "e0f38a2a-6f21-46ce-a441-2eef5fe123c5",
+                        "lastName": "Викулов",
+                        "firstName": "Александр",
+                        "middleName": "Николаевич"
+                    }
+                ],
+                "audiences": [
+                    {
+                        "name": "221х",
+                        "uuid": "51bc1849-7d88-45d3-ae4f-ea6ccf69584e",
+                        "building": "B1 ХимЛаб",
+                        "root_uuid": "8c1b7bb8-e690-11db-89c3-000cf1a7cbf0",
+                        "department_uid": null,
+                        "building_id_block": 16,
+                        "building_id_building": 38
+                    }
+                ],
+                "startTime": "14:05",
+                "discipline": {
+                    "abbr": "CAD/CAEС",
+                    "actType": "lecture",
+                    "fullName": "CAD/CAE системы",
+                    "shortName": "CAD/CAE системы"
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 35,
+                "endTimeHourNum": 15,
+                "startTimeMinNum": 5,
+                "startTimeHourNum": 14
+            },
+            {
+                "day": 2,
+                "time": 3,
+                "week": "all",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1-21Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "13:55",
+                "teachers": [],
+                "audiences": [],
+                "startTime": "11:50",
+                "discipline": {
+                    "abbr": "ФКиС 11:10 Измайлово",
+                    "fullName": "ФКиС 11:10 Измайлово",
+                    "shortName": "ФКиС 11:10 Измайлово"
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 55,
+                "endTimeHourNum": 13,
+                "startTimeMinNum": 50,
+                "startTimeHourNum": 11
+            },
+            {
+                "day": 2,
+                "time": 4,
+                "week": "all",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1Ц-42Б; ИУ1-21Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "8155605c-bc7e-11ee-b32d-df9b99f124c0"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "15:35",
+                "teachers": [
+                    {
+                        "uuid": "9bdee69c-3bc2-49cd-9438-6249c795140d",
+                        "lastName": "Щербаков",
+                        "firstName": "Олег",
+                        "middleName": "Сергеевич"
+                    }
+                ],
+                "audiences": [
+                    {
+                        "name": "103х",
+                        "uuid": "dba7e6b4-86bf-4b0a-9d5e-c6313f16312c",
+                        "building": "B1 ХимЛаб",
+                        "root_uuid": "8c1b7bb8-e690-11db-89c3-000cf1a7cbf0",
+                        "department_uid": null,
+                        "building_id_block": 16,
+                        "building_id_building": 38
+                    }
+                ],
+                "startTime": "14:05",
+                "discipline": {
+                    "abbr": "ЛАиФНП",
+                    "actType": "seminar",
+                    "fullName": "Линейная алгебра и функции нескольких переменных",
+                    "shortName": ""
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 35,
+                "endTimeHourNum": 15,
+                "startTimeMinNum": 5,
+                "startTimeHourNum": 14
+            },
+            {
+                "day": 2,
+                "time": 5,
+                "week": "all",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1Ц-42Б; ИУ1-21Б,22Б; ИУ3-21Б,22Б,23Б; ИУ3И-21Б,22Б,23Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "8155605c-bc7e-11ee-b32d-df9b99f124c0"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad86903-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f211-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad491cb-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad35028-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad5db96-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad71dc1-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad5dcd4-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "17:25",
+                "teachers": [
+                    {
+                        "uuid": "8d0f4730-5f1f-4b2c-b12c-22f1e40ff9f3",
+                        "lastName": "Марченко",
+                        "firstName": "Владимир",
+                        "middleName": "Викторович"
+                    }
+                ],
+                "audiences": [
+                    {
+                        "name": "301х",
+                        "uuid": "ac08597d-a00d-48df-935a-3bc1d2ef0874",
+                        "building": "B1 ХимЛаб",
+                        "root_uuid": "8c1b7bb8-e690-11db-89c3-000cf1a7cbf0",
+                        "department_uid": null,
+                        "building_id_block": 16,
+                        "building_id_building": 38
+                    }
+                ],
+                "startTime": "15:55",
+                "discipline": {
+                    "abbr": "ЛАиФНП",
+                    "actType": "lecture",
+                    "fullName": "Линейная алгебра и функции нескольких переменных",
+                    "shortName": ""
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 25,
+                "endTimeHourNum": 17,
+                "startTimeMinNum": 55,
+                "startTimeHourNum": 15
+            },
+            {
+                "day": 2,
+                "time": 6,
+                "week": "all",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1-21Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "19:05",
+                "teachers": [],
+                "audiences": [
+                    {
+                        "name": "305х",
+                        "uuid": "f6e1fa26-c830-48c2-9577-3ab9227604e0",
+                        "building": "B1 ХимЛаб",
+                        "root_uuid": "8c1b7bb8-e690-11db-89c3-000cf1a7cbf0",
+                        "department_uid": null,
+                        "building_id_block": 16,
+                        "building_id_building": 38
+                    },
+                    {
+                        "name": "211х",
+                        "uuid": "40e9c276-8047-4282-800a-843b9a7f802c",
+                        "building": "B1 ХимЛаб",
+                        "root_uuid": "8c1b7bb8-e690-11db-89c3-000cf1a7cbf0",
+                        "department_uid": null,
+                        "building_id_block": 16,
+                        "building_id_building": 38
+                    }
+                ],
+                "startTime": "17:35",
+                "discipline": {
+                    "abbr": "ИЯ",
+                    "actType": "seminar",
+                    "fullName": "Иностранный язык",
+                    "shortName": ""
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 5,
+                "endTimeHourNum": 19,
+                "startTimeMinNum": 35,
+                "startTimeHourNum": 17
+            },
+            {
+                "day": 3,
+                "time": 1,
+                "week": "all",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1Ц-42Б; ИУ1-21Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "8155605c-bc7e-11ee-b32d-df9b99f124c0"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "10:00",
+                "teachers": [
+                    {
+                        "uuid": "d216f1cf-daee-48fc-8649-085857d58575",
+                        "lastName": "Лапшин",
+                        "firstName": "Владимир",
+                        "middleName": "Владимирович"
+                    }
+                ],
+                "audiences": [
+                    {
+                        "name": "145л",
+                        "uuid": "7cd407c7-6937-4374-bf4b-80576dcc898e",
+                        "building": "E1 УЛК",
+                        "root_uuid": "8c1b7bb8-e690-11db-89c3-000cf1a7cbf0",
+                        "department_uid": null,
+                        "building_id_block": 4,
+                        "building_id_building": 20
+                    }
+                ],
+                "startTime": "08:30",
+                "discipline": {
+                    "abbr": "ПМ",
+                    "actType": "lecture",
+                    "fullName": "Прикладная механика",
+                    "shortName": ""
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 0,
+                "endTimeHourNum": 10,
+                "startTimeMinNum": 30,
+                "startTimeHourNum": 8
+            },
+            {
+                "day": 3,
+                "time": 2,
+                "week": "all",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1Ц-42Б; ИУ1-21Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "8155605c-bc7e-11ee-b32d-df9b99f124c0"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "11:40",
+                "teachers": [
+                    {
+                        "uuid": "d216f1cf-daee-48fc-8649-085857d58575",
+                        "lastName": "Лапшин",
+                        "firstName": "Владимир",
+                        "middleName": "Владимирович"
+                    }
+                ],
+                "audiences": [
+                    {
+                        "name": "145л",
+                        "uuid": "7cd407c7-6937-4374-bf4b-80576dcc898e",
+                        "building": "E1 УЛК",
+                        "root_uuid": "8c1b7bb8-e690-11db-89c3-000cf1a7cbf0",
+                        "department_uid": null,
+                        "building_id_block": 4,
+                        "building_id_building": 20
+                    }
+                ],
+                "startTime": "10:10",
+                "discipline": {
+                    "abbr": "ПМ",
+                    "actType": "seminar",
+                    "fullName": "Прикладная механика",
+                    "shortName": ""
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 40,
+                "endTimeHourNum": 11,
+                "startTimeMinNum": 10,
+                "startTimeHourNum": 10
+            },
+            {
+                "day": 3,
+                "time": 3,
+                "week": "all",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1Ц-42Б; ИУ1-21Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "8155605c-bc7e-11ee-b32d-df9b99f124c0"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "13:20",
+                "teachers": [
+                    {
+                        "uuid": "e0f38a2a-6f21-46ce-a441-2eef5fe123c5",
+                        "lastName": "Викулов",
+                        "firstName": "Александр",
+                        "middleName": "Николаевич"
+                    }
+                ],
+                "audiences": [
+                    {
+                        "name": "114л",
+                        "uuid": "fb0c05e1-d4ca-4c21-ac31-2e9bf045e0b4",
+                        "building": "E1 УЛК",
+                        "root_uuid": "8c1b7bb8-e690-11db-89c3-000cf1a7cbf0",
+                        "department_uid": null,
+                        "building_id_block": 4,
+                        "building_id_building": 20
+                    }
+                ],
+                "startTime": "11:50",
+                "discipline": {
+                    "abbr": "CAD/CAEС",
+                    "actType": "seminar",
+                    "fullName": "CAD/CAE системы",
+                    "shortName": "CAD/CAE системы"
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 20,
+                "endTimeHourNum": 13,
+                "startTimeMinNum": 50,
+                "startTimeHourNum": 11
+            },
+            {
+                "day": 3,
+                "time": 4,
+                "week": "ch",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1Ц-42Б; ИУ1-21Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "8155605c-bc7e-11ee-b32d-df9b99f124c0"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "15:35",
+                "teachers": [
+                    {
+                        "uuid": "e0f38a2a-6f21-46ce-a441-2eef5fe123c5",
+                        "lastName": "Викулов",
+                        "firstName": "Александр",
+                        "middleName": "Николаевич"
+                    }
+                ],
+                "audiences": [
+                    {
+                        "name": "114л",
+                        "uuid": "fb0c05e1-d4ca-4c21-ac31-2e9bf045e0b4",
+                        "building": "E1 УЛК",
+                        "root_uuid": "8c1b7bb8-e690-11db-89c3-000cf1a7cbf0",
+                        "department_uid": null,
+                        "building_id_block": 4,
+                        "building_id_building": 20
+                    }
+                ],
+                "startTime": "14:05",
+                "discipline": {
+                    "abbr": "CAD/CAEС",
+                    "actType": "lab",
+                    "fullName": "CAD/CAE системы",
+                    "shortName": "CAD/CAE системы"
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 35,
+                "endTimeHourNum": 15,
+                "startTimeMinNum": 5,
+                "startTimeHourNum": 14
+            },
+            {
+                "day": 4,
+                "time": 2,
+                "week": "zn",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1-21Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "11:40",
+                "teachers": [
+                    {
+                        "uuid": "0e9720c2-77c6-11ee-b832-005056b16637",
+                        "lastName": "Кущук",
+                        "firstName": "Леонид",
+                        "middleName": "Ильич"
+                    }
+                ],
+                "audiences": [
+                    {
+                        "name": "523",
+                        "uuid": "4341bc19-52e9-480a-9024-f849413d9b7d",
+                        "building": "A1 ГУК",
+                        "root_uuid": "8c1b7bb8-e690-11db-89c3-000cf1a7cbf0",
+                        "department_uid": null,
+                        "building_id_block": 2,
+                        "building_id_building": 21
+                    }
+                ],
+                "startTime": "10:10",
+                "discipline": {
+                    "abbr": "Физ",
+                    "actType": "seminar",
+                    "fullName": "Физика",
+                    "shortName": "Физика"
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 40,
+                "endTimeHourNum": 11,
+                "startTimeMinNum": 10,
+                "startTimeHourNum": 10
+            },
+            {
+                "day": 4,
+                "time": 3,
+                "week": "all",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1-21Б,22Б; ИУ3-21Б,22Б,23Б; ИУ3И-21Б,22Б,23Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad86903-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f211-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad491cb-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad35028-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad5db96-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad71dc1-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad5dcd4-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "13:20",
+                "teachers": [
+                    {
+                        "uuid": "4c07e9a0-86bd-49af-a2a6-fd7bcc8651c9",
+                        "lastName": "Бянкин",
+                        "firstName": "Валерий",
+                        "middleName": "Михайлович"
+                    }
+                ],
+                "audiences": [
+                    {
+                        "name": "520",
+                        "uuid": "d4e14197-9d14-42a2-b0d7-2622f7df95ee",
+                        "building": "A1 ГУК",
+                        "root_uuid": "8c1b7bb8-e690-11db-89c3-000cf1a7cbf0",
+                        "department_uid": null,
+                        "building_id_block": 2,
+                        "building_id_building": 21
+                    }
+                ],
+                "startTime": "11:50",
+                "discipline": {
+                    "abbr": "Физ",
+                    "actType": "lecture",
+                    "fullName": "Физика",
+                    "shortName": "Физика"
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 20,
+                "endTimeHourNum": 13,
+                "startTimeMinNum": 50,
+                "startTimeHourNum": 11
+            },
+            {
+                "day": 4,
+                "time": 4,
+                "week": "ch",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1-21Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "15:35",
+                "teachers": [
+                    {
+                        "uuid": "4869dc28-42c2-465b-85d7-3a241944f795",
+                        "lastName": "Инфимовский",
+                        "firstName": "Юрий",
+                        "middleName": "Юрьевич"
+                    },
+                    {
+                        "uuid": "2b8b83be-6eb2-11ef-b83c-005056b16554",
+                        "lastName": "Воронова",
+                        "firstName": "Валентина",
+                        "middleName": "Владимировна"
+                    }
+                ],
+                "audiences": [
+                    {
+                        "name": "каф. ФН4",
+                        "uuid": null
+                    }
+                ],
+                "startTime": "14:05",
+                "discipline": {
+                    "abbr": "Физ",
+                    "actType": "lab",
+                    "fullName": "Физика",
+                    "shortName": "Физика"
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 35,
+                "endTimeHourNum": 15,
+                "startTimeMinNum": 5,
+                "startTimeHourNum": 14
+            },
+            {
+                "day": 4,
+                "time": 4,
+                "week": "zn",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1-21Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "15:35",
+                "teachers": [
+                    {
+                        "uuid": "0340b3f4-0608-4981-aeeb-28541cdd3fe0",
+                        "lastName": "Велищанский",
+                        "firstName": "Михаил",
+                        "middleName": "Александрович"
+                    }
+                ],
+                "audiences": [
+                    {
+                        "name": "427ю",
+                        "uuid": "2cc21aeb-1ae1-4acc-b99a-833beb4960da",
+                        "building": "A1 ГУК",
+                        "root_uuid": "8c1b7bb8-e690-11db-89c3-000cf1a7cbf0",
+                        "department_uid": null,
+                        "building_id_block": 2,
+                        "building_id_building": 22
+                    }
+                ],
+                "startTime": "14:05",
+                "discipline": {
+                    "abbr": "ИиДУ",
+                    "actType": "seminar",
+                    "fullName": "Интегралы и дифференциальные уравнения",
+                    "shortName": ""
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 35,
+                "endTimeHourNum": 15,
+                "startTimeMinNum": 5,
+                "startTimeHourNum": 14
+            },
+            {
+                "day": 5,
+                "time": 2,
+                "week": "all",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1Ц-42Б; ИУ1-21Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "8155605c-bc7e-11ee-b32d-df9b99f124c0"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "11:40",
+                "teachers": [
+                    {
+                        "uuid": "11552a79-1aa8-11ec-b81d-005056b16554",
+                        "lastName": "Николаев",
+                        "firstName": "Артём",
+                        "middleName": "Александрович"
+                    }
+                ],
+                "audiences": [
+                    {
+                        "name": "114л",
+                        "uuid": "fb0c05e1-d4ca-4c21-ac31-2e9bf045e0b4",
+                        "building": "E1 УЛК",
+                        "root_uuid": "8c1b7bb8-e690-11db-89c3-000cf1a7cbf0",
+                        "department_uid": null,
+                        "building_id_block": 4,
+                        "building_id_building": 20
+                    }
+                ],
+                "startTime": "10:10",
+                "discipline": {
+                    "abbr": "РGUIП",
+                    "actType": "seminar",
+                    "fullName": "Разработка GUI приложений",
+                    "shortName": "Разработка GUI приложений"
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 40,
+                "endTimeHourNum": 11,
+                "startTimeMinNum": 10,
+                "startTimeHourNum": 10
+            },
+            {
+                "day": 5,
+                "time": 3,
+                "week": "ch",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1Ц-42Б; ИУ1-21Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "8155605c-bc7e-11ee-b32d-df9b99f124c0"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "13:55",
+                "teachers": [
+                    {
+                        "uuid": "11552a79-1aa8-11ec-b81d-005056b16554",
+                        "lastName": "Николаев",
+                        "firstName": "Артём",
+                        "middleName": "Александрович"
+                    }
+                ],
+                "audiences": [
+                    {
+                        "name": "114л",
+                        "uuid": "fb0c05e1-d4ca-4c21-ac31-2e9bf045e0b4",
+                        "building": "E1 УЛК",
+                        "root_uuid": "8c1b7bb8-e690-11db-89c3-000cf1a7cbf0",
+                        "department_uid": null,
+                        "building_id_block": 4,
+                        "building_id_building": 20
+                    }
+                ],
+                "startTime": "12:25",
+                "discipline": {
+                    "abbr": "РGUIП",
+                    "actType": "lab",
+                    "fullName": "Разработка GUI приложений",
+                    "shortName": "Разработка GUI приложений"
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 55,
+                "endTimeHourNum": 13,
+                "startTimeMinNum": 25,
+                "startTimeHourNum": 12
+            },
+            {
+                "day": 5,
+                "time": 3,
+                "week": "zn",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1Ц-42Б,43Б; ИУ1-21Б,22Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "8155605c-bc7e-11ee-b32d-df9b99f124c0"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "697579b8-4cc9-11ef-a462-afd22cd779ad"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        },
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad86903-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "13:20",
+                "teachers": [
+                    {
+                        "uuid": "11552a79-1aa8-11ec-b81d-005056b16554",
+                        "lastName": "Николаев",
+                        "firstName": "Артём",
+                        "middleName": "Александрович"
+                    }
+                ],
+                "audiences": [
+                    {
+                        "name": "216л",
+                        "uuid": "e91410e0-f220-4f22-9721-ea3616673e2f",
+                        "building": "E1 УЛК",
+                        "root_uuid": "8c1b7bb8-e690-11db-89c3-000cf1a7cbf0",
+                        "department_uid": null,
+                        "building_id_block": 4,
+                        "building_id_building": 20
+                    }
+                ],
+                "startTime": "11:50",
+                "discipline": {
+                    "abbr": "РGUIП",
+                    "actType": "lecture",
+                    "fullName": "Разработка GUI приложений",
+                    "shortName": "Разработка GUI приложений"
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 20,
+                "endTimeHourNum": 13,
+                "startTimeMinNum": 50,
+                "startTimeHourNum": 11
+            },
+            {
+                "day": 5,
+                "time": 4,
+                "week": "all",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1-21Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "16:00",
+                "teachers": [],
+                "audiences": [
+                    {
+                        "name": "каф. ФВ",
+                        "uuid": null
+                    }
+                ],
+                "startTime": "14:30",
+                "discipline": {
+                    "abbr": "ЭКпоФКиС",
+                    "actType": "seminar",
+                    "fullName": "Элективный курс по физической культуре и спорту",
+                    "shortName": "Электив.курс по физкульт."
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 0,
+                "endTimeHourNum": 16,
+                "startTimeMinNum": 30,
+                "startTimeHourNum": 14
+            },
+            {
+                "day": 6,
+                "time": 2,
+                "week": "all",
+                "groups": [
+                    {
+                        "name": "ИУ1-21Б",
+                        "uuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2",
+                        "department_uid": "a2336d07-82fc-1029-96dd-000347adedc6"
+                    }
+                ],
+                "stream": {
+                    "name": "ИУ1-21Б",
+                    "groups": [
+                        {
+                            "sub1": 0,
+                            "sub2": 0,
+                            "groupUuid": "bad1f0ec-ed29-11ef-becd-8753117d52b2"
+                        }
+                    ]
+                },
+                "endTime": "11:40",
+                "teachers": [],
+                "audiences": [],
+                "startTime": "10:10",
+                "discipline": {
+                    "abbr": "Самостоятельная работа",
+                    "actType": "generated",
+                    "fullName": "Самостоятельная работа",
+                    "shortName": "Самостоятельная работа"
+                },
+                "permission": "timetable.edit-all",
+                "endTimeMinNum": 40,
+                "endTimeHourNum": 11,
+                "startTimeMinNum": 10,
+                "startTimeHourNum": 10
+            }
+        ]
+    },
+    "date": "2026-03-21T10:43:37.887+03:00"
+}
