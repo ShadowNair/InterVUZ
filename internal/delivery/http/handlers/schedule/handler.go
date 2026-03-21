@@ -2,7 +2,6 @@ package schedule
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"strings"
@@ -33,17 +32,11 @@ func (h *Handler) Import(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var request domain.ScheduleImportRequest
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		common.WriteError(w, http.StatusBadRequest, "bad_request", "invalid json body")
-		return
-	}
-
 	// Опционально: добавляем таймаут на всю операцию импорта
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Minute)
 	defer cancel()
 
-	response, err := h.useCase.Import(ctx, request)
+	response, err := h.useCase.Import(ctx, domain.ScheduleImportRequest{})
 	if err != nil {
 		// Map errors to appropriate HTTP status
 		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {

@@ -127,6 +127,9 @@ func NewStubScheduleRepository(dataDir string) (*StubScheduleRepository, error) 
 }
 
 func (r *StubScheduleRepository) Import(ctx context.Context, request domain.ScheduleImportRequest) (*domain.ScheduleImportResult, error) {
+	_ = request
+	const maxGroupsToImport = 6
+
 	inputPath := filepath.Join(r.basePath, "schedule_ID.json")
 	
 	// 1. Читаем иерархию групп
@@ -143,6 +146,9 @@ func (r *StubScheduleRepository) Import(ctx context.Context, request domain.Sche
 	// 2. Собираем UUID групп
 	var groupUUIDs []string
 	collectGroupUUIDs(root.Data, &groupUUIDs)
+	if len(groupUUIDs) > maxGroupsToImport {
+		groupUUIDs = groupUUIDs[:maxGroupsToImport]
+	}
 
 	client := &http.Client{Timeout: 30 * time.Second}
 	importedCount := 0
