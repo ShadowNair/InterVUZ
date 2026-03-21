@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: intervuz-app
+    depends_on:
+      - postgres
+    environment:
+      HTTP_PORT: "8080"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: intervuz
+      DB_USER: intervuz
+      DB_PASSWORD: intervuz
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: intervuz-postgres
+    environment:
+      POSTGRES_DB: intervuz
+      POSTGRES_USER: intervuz
+      POSTGRES_PASSWORD: intervuz
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/migrations/000000_init.up.sql:/docker-entrypoint-initdb.d/001_init.sql:ro
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
