@@ -8,6 +8,7 @@ import (
 
 	"github.com/GIT_USER_ID/GIT_REPO_ID/internal/config"
 	healthhandler "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/handlers/health"
+	imagehandler "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/handlers/image"
 	placehandler "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/handlers/places"
 	roomhandler "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/handlers/rooms"
 	routehandler "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/handlers/routes"
@@ -36,6 +37,7 @@ func main() {
 	scheduleHTTPHandler := schedulehandler.NewHandler(scheduleUseCase)
 	roomHTTPHandler := roomhandler.NewHandler(roomUseCase)
 	healthHTTPHandler := healthhandler.NewHandler()
+	imageHTTPHandler := imagehandler.NewHandler(cfg.RootImagePath)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/places", placeHTTPHandler.List)
@@ -47,6 +49,7 @@ func main() {
 	mux.HandleFunc("/users/schedule/", scheduleHTTPHandler.GetGroupSchedule)
 	mux.HandleFunc("/rooms/availability", roomHTTPHandler.ListAvailability)
 	mux.HandleFunc("/health", healthHTTPHandler.Handle)
+	mux.HandleFunc("/image", imageHTTPHandler.Serve)
 
 	server := &http.Server{
 		Addr:              ":" + cfg.HTTPPort,

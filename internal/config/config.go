@@ -3,7 +3,8 @@ package config
 import "os"
 
 type Config struct {
-	HTTPPort string
+	HTTPPort      string
+	RootImagePath string
 }
 
 func Load() Config {
@@ -12,7 +13,13 @@ func Load() Config {
 		port = "8080"
 	}
 
+	rootImagePath := os.Getenv("ROOT_IMAGE_PATH")
+	if rootImagePath == "" {
+		rootImagePath = "root-image.png"
+	}
+
 	return Config{
-		HTTPPort: port,
+		HTTPPort:      port,
+		RootImagePath: rootImagePath,
 	}
 }

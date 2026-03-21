@@ -17,6 +17,8 @@ tags:
     description: Получение расписания и каталога учебных групп
   - name: Rooms
     description: Поиск свободных аудиторий
+  - name: Media
+    description: Отдача медиафайлов для фронтенда
 paths:
   /places:
     get:
@@ -224,6 +226,42 @@ paths:
                 required: [items]
         '400':
           $ref: '#/components/responses/BadRequest'
+  /image:
+    get:
+      tags: [Media]
+      summary: Получить изображение из корня проекта
+      description: >
+        Возвращает бинарное содержимое изображения и передает его размеры в HTTP-заголовках.
+        Путь к файлу определяется конфигурацией приложения.
+      responses:
+        '200':
+          description: Изображение успешно получено
+          headers:
+            X-Image-Width:
+              description: Ширина изображения в пикселях
+              schema:
+                type: integer
+                example: 1920
+            X-Image-Height:
+              description: Высота изображения в пикселях
+              schema:
+                type: integer
+                example: 1080
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/gif:
+              schema:
+                type: string
+                format: binary
+        '404':
+          $ref: '#/components/responses/NotFound'
 components:
   parameters:
     PlaceId:
