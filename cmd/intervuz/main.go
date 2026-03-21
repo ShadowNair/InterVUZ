@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/GIT_USER_ID/GIT_REPO_ID/internal/config"
+	mid "github.com/GIT_USER_ID/GIT_REPO_ID/internal/middleware"
 	healthhandler "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/handlers/health"
 	imagehandler "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/handlers/image"
 	placehandler "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/handlers/places"
@@ -51,9 +52,12 @@ func main() {
 	mux.HandleFunc("/health", healthHTTPHandler.Handle)
 	mux.HandleFunc("/image", imageHTTPHandler.Serve)
 
+	corsMiddleware := mid.CORS(nil)
+	handlerWithCORS := corsMiddleware(mux)
+
 	server := &http.Server{
 		Addr:              ":" + cfg.HTTPPort,
-		Handler:           mux,
+		Handler:           handlerWithCORS,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
