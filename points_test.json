@@ -1,0 +1,81 @@
+{
+  "id": "1",
+  "places": [
+    {
+      "id": "place_1",
+      "name": "Точка 1",
+      "type": "classroom",
+      "description": "",
+      "tags": [],
+      "isAccessible": true,
+      "coordinates": {
+        "building": "УЛК",
+        "floor": "1",
+        "x": 518,
+        "y": 171
+      }
+    },
+    {
+      "id": "place_2",
+      "name": "Точка 2",
+      "type": "classroom",
+      "description": "",
+      "tags": [],
+      "isAccessible": true,
+      "coordinates": {
+        "building": "УЛК",
+        "floor": "1",
+        "x": 460,
+        "y": 218
+      }
+    },
+    {
+      "id": "place_3",
+      "name": "Точка 3",
+      "type": "classroom",
+      "description": "",
+      "tags": [],
+      "isAccessible": true,
+      "coordinates": {
+        "building": "УЛК",
+        "floor": "1",
+        "x": 518,
+        "y": 220
+      }
+    },
+    {
+      "id": "place_4",
+      "name": "Точка 4",
+      "type": "classroom",
+      "description": "",
+      "tags": [],
+      "isAccessible": true,
+      "coordinates": {
+        "building": "УЛК",
+        "floor": "1",
+        "x": 428,
+        "y": 218
+      }
+    },
+    {
+      "id": "place_5",
+      "name": "Точка 5",
+      "type": "classroom",
+      "description": "",
+      "tags": [],
+      "isAccessible": true,
+      "coordinates": {
+        "building": "УЛК",
+        "floor": "1",
+        "x": 351,
+        "y": 177
+      }
+    }
+  ],
+  "width": 1280,
+  "alt": "Карта 1 этажа",
+  "height": 570,
+  "building": "УЛК",
+  "label": "1",
+  "image": "photo_2026-03-21 17.43.15.jpeg"
+}
