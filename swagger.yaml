@@ -1,0 +1,670 @@
+openapi: 3.0.3
+info:
+  title: InterVUZ API
+  version: 1.0.0
+  description: >
+    API сервиса InterVUZ для навигации по вузу, работы с расписанием и поиска
+    свободных аудиторий.
+servers:
+  - url: https://api.intervuz.local/v1
+    description: Production
+tags:
+  - name: Places
+    description: Навигация по кампусу и поиск точек интереса
+  - name: Routes
+    description: Построение маршрутов по вузу
+  - name: Schedule
+    description: Получение расписания и каталога учебных групп
+  - name: Rooms
+    description: Поиск свободных аудиторий
+paths:
+  /places:
+    get:
+      tags: [Places]
+      summary: Получить список точек в вузе
+      description: >
+        Возвращает аудитории, кафедры, столовые, деканаты, принтеры и другие точки,
+        доступные для навигации.
+      parameters:
+        - in: query
+          name: type
+          schema:
+            $ref: '#/components/schemas/PlaceType'
+          description: Фильтр по типу точки
+        - in: query
+          name: building
+          schema:
+            type: string
+          description: Идентификатор или название корпуса
+        - in: query
+          name: floor
+          schema:
+            type: integer
+            minimum: 0
+          description: Фильтр по этажу
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Поиск по названию точки
+      responses:
+        '200':
+          description: Список точек
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Place'
+                  total:
+                    type: integer
+                    example: 42
+                required: [items, total]
+  /places/{placeId}:
+    get:
+      tags: [Places]
+      summary: Получить информацию о точке
+      parameters:
+        - $ref: '#/components/parameters/PlaceId'
+      responses:
+        '200':
+          description: Детальная информация о точке
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Place'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /routes:
+    post:
+      tags: [Routes]
+      summary: Построить маршрут между точками
+      description: Возвращает маршрут по корпусу от стартовой точки до целевой.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteRequest'
+      responses:
+        '200':
+          description: Маршрут построен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Route'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /schedule/import:
+    post:
+      tags: [Schedule]
+      summary: Импортировать расписание пользователя
+      description: >
+        Загружает расписание вручную, по файлу или по внешней ссылке для последующей
+        синхронизации в приложении.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleImportRequest'
+      responses:
+        '202':
+          description: Импорт принят в обработку
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleImportResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /users/schedule/groups:
+    get:
+      tags: [Schedule]
+      summary: Получить дерево всех учебных групп
+      description: >
+        Возвращает иерархию вуза с факультетами, кафедрами, курсами и конечными узлами
+        типа `group`. Формат ответа повторяет структуру из `schedule_ID.json`.
+      responses:
+        '200':
+          description: Дерево всех доступных групп
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupCatalogResponse'
+  /users/schedule/{groupId}:
+    get:
+      tags: [Schedule]
+      summary: Получить расписание группы
+      description: >
+        Возвращает расписание конкретной группы. Формат ответа повторяет структуру из
+        `schedule_group.json`: корневой объект `data` содержит идентификатор группы,
+        ссылку на оригинальное расписание и массив `schedule`.
+      parameters:
+        - $ref: '#/components/parameters/GroupId'
+      responses:
+        '200':
+          description: Расписание группы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupScheduleResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /users/schedule/events/{eventId}:
+    get:
+      tags: [Schedule]
+      summary: Получить одно событие расписания
+      description: >
+        Возвращает один элемент расписания в том же формате, что и элемент массива
+        `schedule` в `schedule_group.json`. Путь вынесен в `/events/{eventId}`, потому что
+        шаблоны `/users/schedule/{groupId}` и `/users/schedule/{eventId}` конфликтуют в OpenAPI.
+      parameters:
+        - $ref: '#/components/parameters/EventId'
+      responses:
+        '200':
+          description: Одно событие расписания
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleEventResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /rooms/availability:
+    get:
+      tags: [Rooms]
+      summary: Найти свободные аудитории
+      parameters:
+        - in: query
+          name: startsAt
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: endsAt
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: building
+          schema:
+            type: string
+        - in: query
+          name: capacity
+          schema:
+            type: integer
+            minimum: 1
+        - in: query
+          name: equipment
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+          description: Список требуемого оборудования
+      responses:
+        '200':
+          description: Свободные аудитории
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RoomAvailability'
+                required: [items]
+        '400':
+          $ref: '#/components/responses/BadRequest'
+components:
+  parameters:
+    PlaceId:
+      in: path
+      name: placeId
+      required: true
+      schema:
+        type: string
+      description: Идентификатор точки
+    GroupId:
+      in: path
+      name: groupId
+      required: true
+      schema:
+        type: string
+      description: UUID учебной группы
+      example: bad1f0ec-ed29-11ef-becd-8753117d52b2
+    EventId:
+      in: path
+      name: eventId
+      required: true
+      schema:
+        type: string
+      description: Идентификатор события расписания
+    GroupNodeType:
+      in: query
+      name: nodeType
+      schema:
+        type: string
+        enum: [root, university, faculty, department, course, group]
+      description: Дополнительный фильтр по типу узла
+  responses:
+    BadRequest:
+      description: Некорректный запрос
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Ресурс не найден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    PlaceType:
+      type: string
+      enum:
+        - classroom
+        - department
+        - cafeteria
+        - dean_office
+        - printer
+        - office
+        - library
+        - restroom
+        - entrance
+        - other
+    Coordinates:
+      type: object
+      properties:
+        building:
+          type: string
+          example: B1
+        floor:
+          type: integer
+          example: 2
+        x:
+          type: number
+          format: float
+          example: 18.5
+        y:
+          type: number
+          format: float
+          example: 42.0
+      required: [building, floor, x, y]
+    Place:
+      type: object
+      properties:
+        id:
+          type: string
+          example: place_101
+        name:
+          type: string
+          example: Аудитория 214
+        type:
+          $ref: '#/components/schemas/PlaceType'
+        description:
+          type: string
+          example: Компьютерный класс кафедры информатики
+        coordinates:
+          $ref: '#/components/schemas/Coordinates'
+        tags:
+          type: array
+          items:
+            type: string
+          example: [computer, projector]
+        isAccessible:
+          type: boolean
+          example: true
+      required: [id, name, type, coordinates]
+    RouteRequest:
+      type: object
+      properties:
+        fromPlaceId:
+          type: string
+        toPlaceId:
+          type: string
+        accessibleOnly:
+          type: boolean
+          default: false
+      required: [fromPlaceId, toPlaceId]
+    RouteStep:
+      type: object
+      properties:
+        order:
+          type: integer
+          example: 1
+        instruction:
+          type: string
+          example: Поднимитесь на 2 этаж по лестнице справа
+        placeId:
+          type: string
+          nullable: true
+        coordinates:
+          $ref: '#/components/schemas/Coordinates'
+      required: [order, instruction, coordinates]
+    Route:
+      type: object
+      properties:
+        distanceMeters:
+          type: integer
+          example: 180
+        estimatedDurationMinutes:
+          type: integer
+          example: 4
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/RouteStep'
+      required: [distanceMeters, estimatedDurationMinutes, steps]
+    ScheduleImportRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+        sourceType:
+          type: string
+          enum: [file, url, manual]
+        sourceUrl:
+          type: string
+          format: uri
+        fileName:
+          type: string
+          example: schedule.xlsx
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScheduleEventItem'
+      required: [userId, sourceType]
+    ScheduleImportResult:
+      type: object
+      properties:
+        importId:
+          type: string
+          example: import_123
+        status:
+          type: string
+          enum: [queued, processing, completed, failed]
+        importedEvents:
+          type: integer
+          example: 24
+      required: [importId, status]
+    GroupCatalogResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/GroupCatalogNode'
+      required: [data]
+    GroupCatalogNode:
+      type: object
+      properties:
+        abbr:
+          type: string
+          example: АК1-21
+        name:
+          type: string
+          nullable: true
+          example: СМ-2
+        uuid:
+          type: string
+          nullable: true
+        course:
+          type: integer
+          nullable: true
+        semester:
+          type: integer
+          nullable: true
+        nodeType:
+          type: string
+          nullable: true
+          enum: [department, course, group]
+        parentUuid:
+          type: string
+          nullable: true
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupCatalogNode'
+      required: [abbr]
+    GroupScheduleResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/GroupSchedule'
+      required: [data]
+    GroupSchedule:
+      type: object
+      properties:
+        link:
+          type: string
+          format: uri
+          example: https://lks.bmstu.ru/lks-back/srv/v2/ics/bad1f0ec-ed29-11ef-becd-8753117d52b2
+        type:
+          type: string
+          example: schedule.group
+        uuid:
+          type: string
+          example: bad1f0ec-ed29-11ef-becd-8753117d52b2
+        title:
+          type: string
+          example: ИУ1-21Б
+        schedule:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScheduleEventItem'
+      required: [link, type, uuid, title, schedule]
+    ScheduleEventResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/ScheduleEventItem'
+      required: [data]
+    ScheduleEventItem:
+      type: object
+      properties:
+        day:
+          type: integer
+          example: 1
+        time:
+          type: integer
+          example: 1
+        week:
+          type: string
+          example: all
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScheduleGroupRef'
+        stream:
+          $ref: '#/components/schemas/ScheduleStream'
+        endTime:
+          type: string
+          example: 10:00
+        teachers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Teacher'
+        audiences:
+          type: array
+          items:
+            $ref: '#/components/schemas/Audience'
+        startTime:
+          type: string
+          example: 08:30
+        discipline:
+          $ref: '#/components/schemas/Discipline'
+        permission:
+          type: string
+          example: timetable.edit-all
+        endTimeMinNum:
+          type: integer
+          example: 0
+        endTimeHourNum:
+          type: integer
+          example: 10
+        startTimeMinNum:
+          type: integer
+          example: 30
+        startTimeHourNum:
+          type: integer
+          example: 8
+      required:
+        - day
+        - time
+        - week
+        - groups
+        - stream
+        - endTime
+        - teachers
+        - audiences
+        - startTime
+        - discipline
+        - permission
+        - endTimeMinNum
+        - endTimeHourNum
+        - startTimeMinNum
+        - startTimeHourNum
+    ScheduleGroupRef:
+      type: object
+      properties:
+        name:
+          type: string
+          example: ИУ1-21Б
+        uuid:
+          type: string
+          example: bad1f0ec-ed29-11ef-becd-8753117d52b2
+        department_uid:
+          type: string
+          nullable: true
+      required: [name, uuid]
+    ScheduleStream:
+      type: object
+      properties:
+        name:
+          type: string
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScheduleStreamGroup'
+      required: [name, groups]
+    ScheduleStreamGroup:
+      type: object
+      properties:
+        sub1:
+          type: integer
+          example: 0
+        sub2:
+          type: integer
+          example: 0
+        groupUuid:
+          type: string
+      required: [sub1, sub2, groupUuid]
+    Teacher:
+      type: object
+      properties:
+        uuid:
+          type: string
+        lastName:
+          type: string
+        firstName:
+          type: string
+        middleName:
+          type: string
+          nullable: true
+      required: [uuid, lastName, firstName]
+    Audience:
+      type: object
+      properties:
+        name:
+          type: string
+        uuid:
+          type: string
+        building:
+          type: string
+        root_uuid:
+          type: string
+        department_uid:
+          type: string
+          nullable: true
+        building_id_block:
+          type: integer
+        building_id_building:
+          type: integer
+      required:
+        - name
+        - uuid
+        - building
+        - root_uuid
+        - building_id_block
+        - building_id_building
+    Discipline:
+      type: object
+      properties:
+        abbr:
+          type: string
+          example: ИиДУ
+        actType:
+          type: string
+          example: seminar
+        fullName:
+          type: string
+          example: Интегралы и дифференциальные уравнения
+        shortName:
+          type: string
+          example: История
+      required: [abbr, actType, fullName, shortName]
+    RoomAvailability:
+      type: object
+      properties:
+        roomId:
+          type: string
+          example: room_405
+        name:
+          type: string
+          example: Аудитория 405
+        building:
+          type: string
+          example: B2
+        floor:
+          type: integer
+          example: 4
+        capacity:
+          type: integer
+          example: 30
+        equipment:
+          type: array
+          items:
+            type: string
+          example: [projector, whiteboard]
+        availableFrom:
+          type: string
+          format: date-time
+        availableTo:
+          type: string
+          format: date-time
+      required:
+        - roomId
+        - name
+        - building
+        - floor
+        - capacity
+        - availableFrom
+        - availableTo
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          example: not_found
+        message:
+          type: string
+          example: Resource not found
+      required: [code, message]
