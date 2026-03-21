@@ -2,21 +2,21 @@ package storage
 
 import (
 	"context"
-	"strings"
 	"encoding/json"
 	"os"
+	"strings"
 
 	"github.com/GIT_USER_ID/GIT_REPO_ID/internal/domain"
 )
 
 type PlaceJSON struct {
-	ID           string         `json:"id"`
-	Name         string         `json:"name"`
-	Type         string         `json:"type"`
-	Description  string         `json:"description"`
+	ID           string          `json:"id"`
+	Name         string          `json:"name"`
+	Type         string          `json:"type"`
+	Description  string          `json:"description"`
 	Coordinates  CoordinatesJSON `json:"coordinates"`
-	Tags         []string       `json:"tags"`
-	IsAccessible bool           `json:"isAccessible"`
+	Tags         []string        `json:"tags"`
+	IsAccessible bool            `json:"isAccessible"`
 }
 
 type CoordinatesJSON struct {
@@ -26,11 +26,9 @@ type CoordinatesJSON struct {
 	Y        float64 `json:"y"`
 }
 
-
 type StubPlaceRepository struct {
 	places []domain.Place
 }
-
 
 func NewStubPlaceRepository() *StubPlaceRepository {
 	places, err := loadPlacesFromJSON("/GEO_Json/points.json", 5)
@@ -47,78 +45,77 @@ func NewStubPlaceRepository() *StubPlaceRepository {
 func getFallbackPlaces() []domain.Place {
 	return []domain.Place{
 		{
-			ID:          "place_101",
-			Name:        "Аудитория 214",
+			ID:          "wardrobe",
+			Name:        "wardrobe",
 			Type:        "classroom",
-			Description: "Компьютерный класс кафедры информатики",
+			Description: "",
 			Coordinates: domain.Coordinates{
-				Building: "B1",
-				Floor:    2,
-				X:        18.5,
-				Y:        42.0,
-			},
-			Tags:         []string{"computer", "projector"},
-			IsAccessible: true,
-		},
-		{
-			ID:          "place_102",
-			Name:        "Столовая главного корпуса",
-			Type:        "cafeteria",
-			Description: "Основная столовая для студентов и сотрудников",
-			Coordinates: domain.Coordinates{
-				Building: "B1",
+				Building: "УЛК",
 				Floor:    1,
-				X:        7.0,
-				Y:        15.0,
+				X:        518,
+				Y:        171,
 			},
-			Tags:         []string{"food", "coffee"},
+			Tags:         []string{},
 			IsAccessible: true,
 		},
 		{
-			ID:          "place_103",
-			Name:        "Принтер 2 этаж",
-			Type:        "printer",
-			Description: "Точка печати рядом с деканатом",
-			Coordinates: domain.Coordinates{
-				Building: "B1",
-				Floor:    2,
-				X:        20.0,
-				Y:        30.0,
-			},
-			Tags:         []string{"print", "documents"},
-			IsAccessible: true,
-		},
-		{
-			ID:          "place_104",
-			Name:        "Деканат ИУ",
-			Type:        "dean_office",
-			Description: "Деканат факультета информатики и управления",
-			Coordinates: domain.Coordinates{
-				Building: "B2",
-				Floor:    3,
-				X:        12.0,
-				Y:        11.0,
-			},
-			Tags:         []string{"office"},
-			IsAccessible: false,
-		},
-		{
-			ID:          "place_105",
-			Name:        "Аудитория 105",
+			ID:          "129y",
+			Name:        "129y",
 			Type:        "classroom",
-			Description: "Учебная аудитория",
+			Description: "",
 			Coordinates: domain.Coordinates{
-				Building: "1",
+				Building: "УЛК",
 				Floor:    1,
-				X:        10.0,
-				Y:        14.0,
+				X:        460,
+				Y:        218,
 			},
-			Tags:         []string{"lecture"},
-			IsAccessible: false,
+			Tags:         []string{},
+			IsAccessible: true,
+		},
+		{
+			ID:          "127y",
+			Name:        "127y",
+			Type:        "classroom",
+			Description: "",
+			Coordinates: domain.Coordinates{
+				Building: "УЛК",
+				Floor:    1,
+				X:        518,
+				Y:        220,
+			},
+			Tags:         []string{},
+			IsAccessible: true,
+		},
+		{
+			ID:          "ladder",
+			Name:        "ladder",
+			Type:        "classroom",
+			Description: "",
+			Coordinates: domain.Coordinates{
+				Building: "УЛК",
+				Floor:    1,
+				X:        428,
+				Y:        218,
+			},
+			Tags:         []string{},
+			IsAccessible: true,
+		},
+		{
+			ID:          "toilet",
+			Name:        "toilet",
+			Type:        "classroom",
+			Description: "",
+			Coordinates: domain.Coordinates{
+				Building: "УЛК",
+				Floor:    1,
+				X:        351,
+				Y:        177,
+			},
+			Tags:         []string{},
+			IsAccessible: true,
 		},
 	}
 }
-
 
 func loadPlacesFromJSON(filepath string, limit int) ([]domain.Place, error) {
 	data, err := os.ReadFile(filepath)
