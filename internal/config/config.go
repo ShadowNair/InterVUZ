@@ -15,7 +15,7 @@ func Load() Config {
 
 	rootImagePath := os.Getenv("ROOT_IMAGE_PATH")
 	if rootImagePath == "" {
-		rootImagePath = "root-image.png"
+		rootImagePath = "image_floor/Карта МГТУ-1-10-4_page-0001.jpg"
 	}
 
 	return Config{
