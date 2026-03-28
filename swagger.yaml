@@ -6,9 +6,13 @@ info:
     API сервиса InterVUZ для навигации по вузу, работы с расписанием и поиска
     свободных аудиторий.
 servers:
-  - url: https://api.intervuz.local/v1
+  - url: http://localhost:8000
+    description: Local Docker
+  - url: https://api.intervuz.local
     description: Production
 tags:
+  - name: Auth
+    description: Регистрация, вход и обновление JWT-токенов
   - name: Places
     description: Навигация по кампусу и поиск точек интереса
   - name: Routes
@@ -20,6 +24,114 @@ tags:
   - name: Media
     description: Отдача медиафайлов для фронтенда
 paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Зарегистрировать пользователя
+      description: >
+        Создает пользователя, возвращает access token в JSON, а refresh token устанавливает
+        в httpOnly cookie.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Пользователь зарегистрирован
+          headers:
+            Set-Cookie:
+              description: HttpOnly cookie с refresh token
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessTokenResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Выполнить вход
+      description: >
+        Проверяет email и пароль, возвращает access token в JSON, а refresh token устанавливает
+        в httpOnly cookie.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Вход выполнен
+          headers:
+            Set-Cookie:
+              description: HttpOnly cookie с refresh token
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessTokenResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Обновить пару токенов
+      description: >
+        Читает refresh token из httpOnly cookie, возвращает новый access token в JSON и
+        перевыпускает refresh token в httpOnly cookie.
+      responses:
+        '200':
+          description: Токены обновлены
+          headers:
+            Set-Cookie:
+              description: HttpOnly cookie с новым refresh token
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessTokenResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Выйти из системы
+      description: Читает refresh token из httpOnly cookie, отзывает его и очищает cookie.
+      responses:
+        '200':
+          description: Сессия завершена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Получить профиль текущего пользователя
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Профиль текущего пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /places:
     get:
       tags: [Places]
@@ -262,7 +374,28 @@ paths:
                 format: binary
         '404':
           $ref: '#/components/responses/NotFound'
+  /health:
+    get:
+      tags: [Media]
+      summary: Проверить состояние сервиса
+      responses:
+        '200':
+          description: Сервис доступен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                required: [status]
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   parameters:
     PlaceId:
       in: path
@@ -300,6 +433,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Требуется авторизация или переданы невалидные токены
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Ресурс с такими уникальными данными уже существует
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
     NotFound:
       description: Ресурс не найден
       content:
@@ -307,6 +452,133 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
   schemas:
+    ProfileRole:
+      type: string
+      enum: [user, admin]
+      example: user
+    Profile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+          example: student@bmstu.ru
+        username:
+          type: string
+          nullable: true
+          example: ivanov_iu7
+        name:
+          type: string
+          nullable: true
+          example: Иван
+        surname:
+          type: string
+          nullable: true
+          example: Иванов
+        patronymic:
+          type: string
+          nullable: true
+          example: Иванович
+        avatarUrl:
+          type: string
+          format: uri
+          nullable: true
+        role:
+          $ref: '#/components/schemas/ProfileRole'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - email
+        - role
+        - createdAt
+        - updatedAt
+    ProfileResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        data:
+          $ref: '#/components/schemas/Profile'
+      required: [code, data]
+    CodeResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+      required: [code]
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: student@bmstu.ru
+        username:
+          type: string
+          example: ivanov_iu7
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: Sup3rSecret!
+        name:
+          type: string
+          example: Иван
+        surname:
+          type: string
+          example: Иванов
+        patronymic:
+          type: string
+          example: Иванович
+      required: [email, password]
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: student@bmstu.ru
+        password:
+          type: string
+          format: password
+          example: Sup3rSecret!
+      required: [email, password]
+    AccessTokenResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        accessToken:
+          type: string
+          description: JWT для доступа к защищенным ресурсам
+        tokenType:
+          type: string
+          example: Bearer
+        expiresIn:
+          type: integer
+          description: Время жизни access token в секундах
+          example: 900
+        refreshExpiresIn:
+          type: integer
+          description: Время жизни refresh token в секундах
+          example: 2592000
+      required:
+        - code
+        - accessToken
+        - tokenType
+        - expiresIn
+        - refreshExpiresIn
     PlaceType:
       type: string
       enum:

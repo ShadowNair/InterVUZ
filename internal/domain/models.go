@@ -24,6 +24,30 @@ type Coordinates struct {
 	Y        float64 `json:"y"`
 }
 
+type Profile struct {
+	ID           string    `json:"id"`
+	Email        string    `json:"email"`
+	Username     string    `json:"username,omitempty"`
+	Name         string    `json:"name,omitempty"`
+	Surname      string    `json:"surname,omitempty"`
+	Patronymic   string    `json:"patronymic,omitempty"`
+	AvatarURL    string    `json:"avatarUrl,omitempty"`
+	Role         string    `json:"role"`
+	CreatedAt    time.Time `json:"createdAt"`
+	UpdatedAt    time.Time `json:"updatedAt"`
+	PasswordHash string    `json:"-"`
+	PasswordSalt string    `json:"-"`
+}
+
+type RefreshToken struct {
+	ID        string     `json:"id"`
+	ProfileID string     `json:"profileId"`
+	TokenHash string     `json:"-"`
+	ExpiresAt time.Time  `json:"expiresAt"`
+	CreatedAt time.Time  `json:"createdAt"`
+	RevokedAt *time.Time `json:"revokedAt,omitempty"`
+}
+
 type Place struct {
 	ID           string      `json:"id"`
 	Name         string      `json:"name"`

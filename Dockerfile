@@ -15,6 +15,7 @@ WORKDIR /app
 
 COPY --from=builder /intervuz /usr/local/bin/intervuz
 COPY --from=builder /app/schedule /app/schedule
+COPY --from=builder /app/image_floor /app/image_floor
 COPY --from=builder /app/swagger.yaml /app/swagger.yaml
 
 EXPOSE 8000

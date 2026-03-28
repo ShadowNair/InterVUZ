@@ -10,11 +10,9 @@ services:
       - postgres
     environment:
       HTTP_PORT: "8000"
-      DB_HOST: postgres
-      DB_PORT: "5432"
-      DB_NAME: intervuz
-      DB_USER: intervuz
-      DB_PASSWORD: intervuz
+      DATABASE_URL: postgres://intervuz:intervuz@postgres:5432/intervuz?sslmode=disable
+      ACCESS_TOKEN_SECRET: dev-access-secret
+      REFRESH_TOKEN_SECRET: dev-refresh-secret
     ports:
       - "8000:8000"
     restart: unless-stopped
