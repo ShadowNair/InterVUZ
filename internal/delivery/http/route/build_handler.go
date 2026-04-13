@@ -34,6 +34,7 @@ func (h *BuildHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			errors.Is(err, routeusecase.ErrDestinationPlaceNotFound):
 			httpjson.WriteError(w, http.StatusNotFound, "not_found", err.Error())
 		case errors.Is(err, routeusecase.ErrStartVertexNotFound),
+			errors.Is(err, routeusecase.ErrDestinationVertexNotFound),
 			errors.Is(err, routeusecase.ErrDestinationWithoutVertex),
 			errors.Is(err, routeusecase.ErrRouteNotFound):
 			httpjson.WriteError(w, http.StatusUnprocessableEntity, "route_unavailable", err.Error())

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"time"
@@ -14,8 +15,11 @@ import (
 	roomdelivery "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/room"
 	routedelivery "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/route"
 	scheduledelivery "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/schedule"
+	"github.com/GIT_USER_ID/GIT_REPO_ID/internal/domain"
 	mid "github.com/GIT_USER_ID/GIT_REPO_ID/internal/middleware"
 	graphrepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/graph/memory"
+	staticgraphrepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/graph/static"
+	svgrepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/graph/svg"
 	placerepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/place/memory"
 	roomrepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/room/memory"
 	schedulerepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/schedule/file"
@@ -40,8 +44,25 @@ func main() {
 	}
 
 	placeRepo := placerepository.New(places)
-	graphRepo := graphrepository.New(places)
 	roomRepo := roomrepository.New()
+
+	var graphRepo interface {
+		Get(context.Context) (domain.NavigationGraph, error)
+	}
+
+	graphFromJSON, err := bootstrap.LoadNavigationGraphFromJSON(cfg.GraphJSONPath)
+	if err == nil {
+		graphRepo = staticgraphrepository.New(graphFromJSON)
+	} else {
+		log.Printf("load graph from json failed, continue with svg fallback: %v", err)
+		svgGraphRepo, svgErr := svgrepository.New(cfg.GraphSVGPath, places)
+		if svgErr != nil {
+			log.Printf("load graph from svg failed, fallback to generated graph: %v", svgErr)
+			graphRepo = graphrepository.New(places)
+		} else {
+			graphRepo = svgGraphRepo
+		}
+	}
 
 	placeUseCase := placeusecase.New(placeRepo)
 	graphUseCase := graphusecase.New(graphRepo)

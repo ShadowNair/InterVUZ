@@ -11,12 +11,13 @@ import (
 )
 
 var (
-	ErrInvalidInput             = errors.New("invalid route input")
-	ErrStartPlaceNotFound       = errors.New("start place not found")
-	ErrDestinationPlaceNotFound = errors.New("destination place not found")
-	ErrStartVertexNotFound      = errors.New("start vertex not found")
-	ErrDestinationWithoutVertex = errors.New("destination is not linked to the graph")
-	ErrRouteNotFound            = errors.New("route not found")
+	ErrInvalidInput              = errors.New("invalid route input")
+	ErrStartPlaceNotFound        = errors.New("start place not found")
+	ErrDestinationPlaceNotFound  = errors.New("destination place not found")
+	ErrStartVertexNotFound       = errors.New("start vertex not found")
+	ErrDestinationVertexNotFound = errors.New("destination vertex not found")
+	ErrDestinationWithoutVertex  = errors.New("destination is not linked to the graph")
+	ErrRouteNotFound             = errors.New("route not found")
 )
 
 type GraphRepository interface {
@@ -41,28 +42,8 @@ func New(graphRepository GraphRepository, placeRepository PlaceRepository) *UseC
 }
 
 func (uc *UseCase) Build(ctx context.Context, request domain.RouteRequest) (*domain.Route, error) {
-	if request.FromPlaceID == "" || request.ToPlaceID == "" {
+	if !hasRouteEndpoints(request) {
 		return nil, ErrInvalidInput
-	}
-
-	startPlace, err := uc.placeRepository.GetByID(ctx, request.FromPlaceID)
-	if err != nil {
-		if errors.Is(err, domain.ErrNotFound) {
-			return nil, ErrStartPlaceNotFound
-		}
-		return nil, fmt.Errorf("load start place: %w", err)
-	}
-
-	destinationPlace, err := uc.placeRepository.GetByID(ctx, request.ToPlaceID)
-	if err != nil {
-		if errors.Is(err, domain.ErrNotFound) {
-			return nil, ErrDestinationPlaceNotFound
-		}
-		return nil, fmt.Errorf("load destination place: %w", err)
-	}
-
-	if request.AccessibleOnly && (!startPlace.IsAccessible || !destinationPlace.IsAccessible) {
-		return nil, ErrRouteNotFound
 	}
 
 	graph, err := uc.graphRepository.Get(ctx)
@@ -70,33 +51,44 @@ func (uc *UseCase) Build(ctx context.Context, request domain.RouteRequest) (*dom
 		return nil, fmt.Errorf("load graph: %w", err)
 	}
 
+	placesByID := map[string]domain.Place{}
+	if uc.placeRepository != nil {
+		places, listErr := uc.placeRepository.List(ctx, domain.PlaceFilter{})
+		if listErr != nil {
+			return nil, fmt.Errorf("load places catalog: %w", listErr)
+		}
+		placesByID = make(map[string]domain.Place, len(places))
+		for _, place := range places {
+			placesByID[place.ID] = place
+		}
+	}
+
+	startVertexID, err := uc.resolveVertexID(ctx, graph, request.FromVertexID, request.FromPlaceID, true, placesByID)
+	if err != nil {
+		return nil, err
+	}
+
+	destinationVertexID, err := uc.resolveVertexID(ctx, graph, request.ToVertexID, request.ToPlaceID, false, placesByID)
+	if err != nil {
+		return nil, err
+	}
+
 	if request.AccessibleOnly {
 		graph = filterAccessibleGraph(graph)
 	}
 
-	startVertexID, ok := findVertexIDByPlaceID(graph, startPlace.ID)
-	if !ok {
-		return nil, ErrStartVertexNotFound
-	}
-
-	destinationVertexID, ok := findVertexIDByPlaceID(graph, destinationPlace.ID)
-	if !ok {
-		return nil, ErrDestinationWithoutVertex
+	if request.AccessibleOnly {
+		if _, ok := findVertexByID(graph, startVertexID); !ok {
+			return nil, ErrStartVertexNotFound
+		}
+		if _, ok := findVertexByID(graph, destinationVertexID); !ok {
+			return nil, ErrDestinationVertexNotFound
+		}
 	}
 
 	pathIDs, distance, err := shortestPath(graph, startVertexID, destinationVertexID)
 	if err != nil {
 		return nil, err
-	}
-
-	places, err := uc.placeRepository.List(ctx, domain.PlaceFilter{})
-	if err != nil {
-		return nil, fmt.Errorf("load places catalog: %w", err)
-	}
-
-	placesByID := make(map[string]domain.Place, len(places))
-	for _, place := range places {
-		placesByID[place.ID] = place
 	}
 
 	verticesByID := make(map[string]domain.GraphVertex, len(graph.Vertices))
@@ -123,6 +115,73 @@ func (uc *UseCase) Build(ctx context.Context, request domain.RouteRequest) (*dom
 		EstimatedDurationMinutes: duration,
 		Steps:                    buildRouteSteps(pathVertices, placesByID),
 	}, nil
+}
+
+func hasRouteEndpoints(request domain.RouteRequest) bool {
+	return (request.FromVertexID != "" || request.FromPlaceID != "") &&
+		(request.ToVertexID != "" || request.ToPlaceID != "")
+}
+
+func (uc *UseCase) resolveVertexID(
+	ctx context.Context,
+	graph domain.NavigationGraph,
+	vertexID string,
+	placeID string,
+	isStart bool,
+	placesByID map[string]domain.Place,
+) (string, error) {
+	if vertexID != "" {
+		if _, ok := findVertexByID(graph, vertexID); ok {
+			return vertexID, nil
+		}
+		if isStart {
+			return "", ErrStartVertexNotFound
+		}
+		return "", ErrDestinationVertexNotFound
+	}
+
+	if placeID == "" {
+		return "", ErrInvalidInput
+	}
+
+	place, ok := placesByID[placeID]
+	if !ok {
+		if uc.placeRepository == nil {
+			if isStart {
+				return "", ErrStartPlaceNotFound
+			}
+			return "", ErrDestinationPlaceNotFound
+		}
+
+		var err error
+		place, err = uc.placeRepository.GetByID(ctx, placeID)
+		if err != nil {
+			if errors.Is(err, domain.ErrNotFound) {
+				if isStart {
+					return "", ErrStartPlaceNotFound
+				}
+				return "", ErrDestinationPlaceNotFound
+			}
+			if isStart {
+				return "", fmt.Errorf("load start place: %w", err)
+			}
+			return "", fmt.Errorf("load destination place: %w", err)
+		}
+	}
+
+	if _, ok := placesByID[place.ID]; !ok {
+		placesByID[place.ID] = place
+	}
+
+	if vertexID, ok := findVertexIDByPlaceID(graph, place.ID); ok {
+		return vertexID, nil
+	}
+
+	if isStart {
+		return "", ErrStartVertexNotFound
+	}
+
+	return "", ErrDestinationWithoutVertex
 }
 
 type neighbor struct {
@@ -300,6 +359,16 @@ func findVertexIDByPlaceID(graph domain.NavigationGraph, placeID string) (string
 	return "", false
 }
 
+func findVertexByID(graph domain.NavigationGraph, vertexID string) (domain.GraphVertex, bool) {
+	for _, vertex := range graph.Vertices {
+		if vertex.ID == vertexID {
+			return vertex, true
+		}
+	}
+
+	return domain.GraphVertex{}, false
+}
+
 func buildRouteSteps(path []domain.GraphVertex, placesByID map[string]domain.Place) []domain.RouteStep {
 	steps := make([]domain.RouteStep, 0, len(path))
 	for index, vertex := range path {
@@ -307,6 +376,7 @@ func buildRouteSteps(path []domain.GraphVertex, placesByID map[string]domain.Pla
 		instruction := buildStepInstruction(path, placesByID, index)
 		step := domain.RouteStep{
 			Order:       index + 1,
+			VertexID:    vertex.ID,
 			Instruction: instruction,
 			Coordinates: domain.Coordinates{
 				Building: vertex.Building,
@@ -329,7 +399,7 @@ func buildRouteSteps(path []domain.GraphVertex, placesByID map[string]domain.Pla
 func buildStepInstruction(path []domain.GraphVertex, placesByID map[string]domain.Place, index int) string {
 	vertex := path[index]
 	place, hasPlace := placesByID[vertex.PlaceID]
-	name := "точку маршрута"
+	name := fmt.Sprintf("узел %s", vertex.ID)
 	if hasPlace {
 		name = place.Name
 	}

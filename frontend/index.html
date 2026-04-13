@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>InterVUZ Floor Viewer</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <aside class="sidebar">
+        <div class="sidebar-section sidebar-brand">
+          <p class="eyebrow">InterVUZ Frontend</p>
+          <h1>Навигационная карта первого этажа</h1>
+          <p class="lead">
+            Фронтенд загружает `svg/floor_1.svg`, показывает граф из
+            `ulk_first_graph.json` и строит путь между узлами этого графа.
+          </p>
+        </div>
+
+        <div class="sidebar-section controls">
+          <label class="field">
+            <span>API backend</span>
+            <input id="apiBaseInput" type="text" value="http://localhost:8000" />
+          </label>
+          <div class="button-row">
+            <button id="toggleGraphButton" class="button button-primary" type="button">
+              Показать граф
+            </button>
+            <button id="resetViewButton" class="button button-secondary" type="button">
+              Сбросить вид
+            </button>
+          </div>
+          <p id="apiStatus" class="status">Карта загружается…</p>
+        </div>
+
+        <div class="sidebar-section search">
+          <label class="field">
+            <span>Поиск по помещениям и узлам</span>
+            <input
+              id="searchInput"
+              type="search"
+              placeholder="Например, room-127 или v42"
+            />
+          </label>
+          <p id="searchSummary" class="caption"></p>
+        </div>
+
+        <div class="sidebar-section details">
+          <p class="section-title">Выбранный объект</p>
+          <div id="selectionCard" class="selection-card is-empty">
+            <p class="selection-empty">Нажмите на помещение в списке или прямо на карте.</p>
+          </div>
+        </div>
+
+        <div class="sidebar-section route-planner">
+          <div class="room-list-header">
+            <p class="section-title">Маршрут</p>
+            <span id="routeBadge" class="pill">ожидание</span>
+          </div>
+          <div class="route-summary-grid">
+            <div class="route-summary-card">
+              <span class="route-summary-label">Старт</span>
+              <strong id="routeStartLabel">Не выбран</strong>
+            </div>
+            <div class="route-summary-card">
+              <span class="route-summary-label">Финиш</span>
+              <strong id="routeEndLabel">Не выбран</strong>
+            </div>
+          </div>
+          <label class="toggle-field">
+            <input id="accessibleOnlyInput" type="checkbox" />
+            <span>Только доступный маршрут</span>
+          </label>
+          <p class="caption">Старт и финиш выбираются по узлам графа.</p>
+          <div class="button-row">
+            <button id="setStartButton" class="button button-secondary" type="button">
+              Старт из выделения
+            </button>
+            <button id="setEndButton" class="button button-secondary" type="button">
+              Финиш из выделения
+            </button>
+          </div>
+          <div class="button-row">
+            <button id="buildRouteButton" class="button button-primary" type="button">
+              Построить путь
+            </button>
+            <button id="swapRouteButton" class="button button-secondary" type="button">
+              Поменять точки
+            </button>
+            <button id="clearRouteButton" class="button button-secondary" type="button">
+              Очистить
+            </button>
+          </div>
+          <p id="routeStatus" class="status">Выберите старт и финиш.</p>
+          <div id="routeMetrics" class="route-metrics"></div>
+          <div id="routeSteps" class="route-steps"></div>
+        </div>
+
+        <div class="sidebar-section room-list-section">
+          <div class="room-list-header">
+            <p class="section-title">Узлы графа</p>
+            <span id="vertexCount" class="pill">0</span>
+          </div>
+          <div id="vertexList" class="room-list" aria-live="polite"></div>
+        </div>
+
+        <div class="sidebar-section room-list-section">
+          <div class="room-list-header">
+            <p class="section-title">Помещения на схеме</p>
+            <span id="roomCount" class="pill">0</span>
+          </div>
+          <div id="roomList" class="room-list" aria-live="polite"></div>
+        </div>
+      </aside>
+
+      <main class="map-panel">
+        <section class="map-card">
+          <div class="map-card-header">
+            <div>
+              <p class="eyebrow">SVG Viewer</p>
+              <h2>floor_1.svg</h2>
+            </div>
+            <p class="caption">Клик по помещению выделяет его, клик по узлу графа выбирает точку маршрута.</p>
+          </div>
+          <div id="mapFrame" class="map-frame">
+            <div id="mapMount" class="map-mount"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

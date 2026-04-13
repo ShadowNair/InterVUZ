@@ -113,3 +113,38 @@ func TestBuildRoute(t *testing.T) {
 		t.Fatalf("unexpected route endpoints: %#v", route.Steps)
 	}
 }
+
+func TestBuildRouteByVertexIDs(t *testing.T) {
+	useCase := New(
+		graphRepositoryStub{
+			graph: domain.NavigationGraph{
+				Vertices: []domain.GraphVertex{
+					{ID: "v1", Building: "1", Floor: 1, X: 10, Y: 10, IsAccessible: true},
+					{ID: "v2", Building: "1", Floor: 1, X: 20, Y: 10, IsAccessible: true},
+					{ID: "v3", Building: "1", Floor: 1, X: 30, Y: 10, IsAccessible: true},
+				},
+				Edges: []domain.GraphEdge{
+					{ID: "e1", From: "v1", To: "v2"},
+					{ID: "e2", From: "v2", To: "v3"},
+				},
+			},
+		},
+		nil,
+	)
+
+	route, err := useCase.Build(context.Background(), domain.RouteRequest{
+		FromVertexID: "v1",
+		ToVertexID:   "v3",
+	})
+	if err != nil {
+		t.Fatalf("expected route, got error: %v", err)
+	}
+
+	if got, want := len(route.Steps), 3; got != want {
+		t.Fatalf("expected %d steps, got %d", want, got)
+	}
+
+	if route.Steps[0].VertexID != "v1" || route.Steps[len(route.Steps)-1].VertexID != "v3" {
+		t.Fatalf("unexpected route vertices: %#v", route.Steps)
+	}
+}

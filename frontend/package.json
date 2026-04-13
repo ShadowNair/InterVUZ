@@ -1,0 +1,9 @@
+{
+  "name": "intervuz-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "python3 server.py --port 3000",
+    "start": "python3 server.py --port 3000"
+  }
+}

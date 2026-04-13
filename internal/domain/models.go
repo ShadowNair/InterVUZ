@@ -40,6 +40,8 @@ type PlacesResponse struct {
 }
 
 type RouteRequest struct {
+	FromVertexID   string `json:"fromVertexId"`
+	ToVertexID     string `json:"toVertexId"`
 	FromPlaceID    string `json:"fromPlaceId"`
 	ToPlaceID      string `json:"toPlaceId"`
 	AccessibleOnly bool   `json:"accessibleOnly"`
@@ -47,6 +49,7 @@ type RouteRequest struct {
 
 type RouteStep struct {
 	Order       int         `json:"order"`
+	VertexID    string      `json:"vertexId"`
 	Instruction string      `json:"instruction"`
 	PlaceID     string      `json:"placeId,omitempty"`
 	Coordinates Coordinates `json:"coordinates"`
