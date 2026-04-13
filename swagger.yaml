@@ -11,6 +11,8 @@ servers:
 tags:
   - name: Places
     description: Навигация по кампусу и поиск точек интереса
+  - name: Graph
+    description: Граф навигации и связанные служебные данные маршрутизации
   - name: Routes
     description: Построение маршрутов по вузу
   - name: Schedule
@@ -80,6 +82,20 @@ paths:
                 $ref: '#/components/schemas/Place'
         '404':
           $ref: '#/components/responses/NotFound'
+  /graph:
+    get:
+      tags: [Graph]
+      summary: Получить граф навигации
+      description: >
+        Возвращает вершины и рёбра навигационного графа, построенного по текущему
+        каталогу точек. Формат графа может изменяться независимо от остальных методов API.
+      responses:
+        '200':
+          description: Граф навигации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Graph'
   /routes:
     post:
       tags: [Routes]
@@ -363,6 +379,59 @@ components:
           type: boolean
           example: true
       required: [id, name, type, coordinates]
+    GraphVertex:
+      type: object
+      properties:
+        id:
+          type: string
+          example: place_101
+        placeId:
+          type: string
+          nullable: true
+          example: place_101
+        building:
+          type: string
+          example: B1
+        floor:
+          type: integer
+          example: 2
+        x:
+          type: number
+          format: float
+          example: 18.5
+        y:
+          type: number
+          format: float
+          example: 42.0
+        isAccessible:
+          type: boolean
+          example: true
+      required: [id, building, floor, x, y, isAccessible]
+    GraphEdge:
+      type: object
+      properties:
+        id:
+          type: string
+          example: edge-1
+        from:
+          type: string
+          example: place_101
+        to:
+          type: string
+          example: place_214
+      required: [id, from, to]
+    Graph:
+      type: object
+      properties:
+        vertices:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphVertex'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphEdge'
+      required: [vertices, edges]
     RouteRequest:
       type: object
       properties:

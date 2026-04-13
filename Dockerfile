@@ -14,6 +14,8 @@ FROM alpine:3.20
 WORKDIR /app
 
 COPY --from=builder /intervuz /usr/local/bin/intervuz
+COPY --from=builder /app/GEO_Json /app/GEO_Json
+COPY --from=builder /app/image_floor /app/image_floor
 COPY --from=builder /app/schedule /app/schedule
 COPY --from=builder /app/swagger.yaml /app/swagger.yaml
 

@@ -3,23 +3,26 @@ package config
 import "os"
 
 type Config struct {
-	HTTPPort      string
-	RootImagePath string
+	HTTPPort        string
+	RootImagePath   string
+	PlacesDataPath  string
+	ScheduleDataDir string
 }
 
 func Load() Config {
-	port := os.Getenv("HTTP_PORT")
-	if port == "" {
-		port = "8000"
-	}
-
-	rootImagePath := os.Getenv("ROOT_IMAGE_PATH")
-	if rootImagePath == "" {
-		rootImagePath = "image_floor/Карта МГТУ-1-10-4_page-0001.jpg"
-	}
-
 	return Config{
-		HTTPPort:      port,
-		RootImagePath: rootImagePath,
+		HTTPPort:        envOrDefault("HTTP_PORT", "8000"),
+		RootImagePath:   envOrDefault("ROOT_IMAGE_PATH", "image_floor/Карта МГТУ-1-10-4_page-0001.jpg"),
+		PlacesDataPath:  envOrDefault("PLACES_DATA_PATH", "GEO_Json/points.json"),
+		ScheduleDataDir: envOrDefault("SCHEDULE_DATA_DIR", "schedule/lksJSON"),
 	}
+}
+
+func envOrDefault(key string, fallback string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return fallback
+	}
+
+	return value
 }
