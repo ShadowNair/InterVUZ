@@ -23,14 +23,18 @@ services:
     image: postgres:16-alpine
     container_name: intervuz-postgres
     environment:
-      POSTGRES_DB: intervuz
-      POSTGRES_USER: intervuz
-      POSTGRES_PASSWORD: intervuz
+      HTTP_PORT: "8000"
+      ROOT_IMAGE_PATH: "image_floor/Карта МГТУ-1-10-4_page-0001.jpg"
+      PLACES_DATA_PATH: "GEO_Json/points.json"
+      SCHEDULE_DATA_DIR: "schedule/lksJSON"
+      STRUCTURE_API_URL: "https://lks.bmstu.ru/lks-back/api/v1/structure"
+      DATABASE_DSN: "postgres://intervuz:intervuz@postgres:5432/intervuz?sslmode=disable"
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db/migrations/000000_init.up.sql:/docker-entrypoint-initdb.d/001_init.sql:ro
+      - ./db/migrations/000001_structure_units.up.sql:/docker-entrypoint-initdb.d/002_structure_units.sql:ro
     restart: unless-stopped
 
 volumes:

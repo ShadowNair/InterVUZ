@@ -20,10 +20,22 @@ type StructureNode struct {
 type StructureUnit struct {
 	ExternalUUID     string
 	ParentExternalID *string
-	Code             string
-	Name             string
-	NodeType         string
-	Course           *int
-	Semester         *int
-	RawPayload       json.RawMessage
+
+	Code     string
+	Name     string
+	NodeType string
+
+	Course   *int
+	Semester *int
+
+	FacultyExternalUUID    *string
+	FacultyCode            *string
+	FacultyName            *string
+	DepartmentExternalUUID *string
+	DepartmentCode         *string
+	DepartmentName         *string
+	CourseNodeExternalUUID *string
+	CourseNodeName         *string
+
+	RawPayload json.RawMessage
 }
