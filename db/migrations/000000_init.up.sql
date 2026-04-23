@@ -164,3 +164,30 @@ CREATE TABLE schedule_event_teachers (
     teacher_id UUID NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,
     PRIMARY KEY (event_id, teacher_id)
 );
+
+CREATE TABLE IF NOT EXISTS tags (
+    id          INTEGER PRIMARY KEY,
+    slug        TEXT NOT NULL UNIQUE,
+    title       TEXT NOT NULL,
+    color       VARCHAR(7) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS news (
+    id              BIGSERIAL PRIMARY KEY,
+    slug            TEXT NOT NULL UNIQUE,
+    title           TEXT NOT NULL,
+    preview_text    TEXT,
+    published_date  DATE NOT NULL,
+    image_preview   TEXT,
+    page_url        TEXT NOT NULL UNIQUE,
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS news_tags (
+    news_id  BIGINT NOT NULL REFERENCES news(id) ON DELETE CASCADE,
+    tag_id   INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+    PRIMARY KEY (news_id, tag_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_news_published_date ON news(published_date);
+CREATE INDEX IF NOT EXISTS idx_news_tags_tag_id ON news_tags(tag_id);

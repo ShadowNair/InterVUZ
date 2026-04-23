@@ -15,7 +15,7 @@ services:
       - ./db/migrations/000002_schedule_source_events.up.sql:/docker-entrypoint-initdb.d/000002_schedule_source_events.up.sql:ro
       - ./db/migrations/000003_academic_groups_structure_fields.up.sql:/docker-entrypoint-initdb.d/000003_academic_groups_structure_fields.up.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -32,15 +32,24 @@ services:
         condition: service_healthy
     environment:
       HTTP_PORT: ${HTTP_PORT:-8000}
-      ROOT_IMAGE_PATH: ${ROOT_IMAGE_PATH:-image_floor/Карта МГТУ-1-10-4_page-0001.jpg}
-      PLACES_DATA_PATH: ${PLACES_DATA_PATH:-GEO_Json/points.json}
-      SCHEDULE_DATA_DIR: ${SCHEDULE_DATA_DIR:-schedule/lksJSON}
+      ROOT_IMAGE_PATH: ${ROOT_IMAGE_PATH:-/app/image_floor/Карта МГТУ-1-10-4_page-0001.jpg}
+      PLACES_DATA_PATH: ${PLACES_DATA_PATH:-/app/GEO_Json/points.json}
+      SCHEDULE_DATA_DIR: ${SCHEDULE_DATA_DIR:-/app/schedule/lksJSON}
+
       STRUCTURE_API_URL: ${STRUCTURE_API_URL:-https://lks.bmstu.ru/lks-back/api/v1/structure}
       SCHEDULE_GROUP_API_BASE_URL: ${SCHEDULE_GROUP_API_BASE_URL:-https://lks.bmstu.ru/lks-back/api/v1/schedules/groups}
       STRUCTURE_TARGET_ROOT_UUID: ${STRUCTURE_TARGET_ROOT_UUID:-8c1b7bb8-e690-11db-89c3-000cf1a7cbf0}
+
       DATABASE_DSN: postgres://${POSTGRES_USER:-intervuz}:${POSTGRES_PASSWORD:-intervuz}@postgres:5432/${POSTGRES_DB:-intervuz}?sslmode=disable
+
       SYNC_ON_STARTUP: ${SYNC_ON_STARTUP:-false}
       SYNC_INTERVAL: ${SYNC_INTERVAL:-72h}
+
+      NEWS_API_URL: ${NEWS_API_URL:-https://api.www.bmstu.ru/news}
+      NEWS_SYNC_ENABLED: ${NEWS_SYNC_ENABLED:-false}
+      NEWS_SYNC_INTERVAL: ${NEWS_SYNC_INTERVAL:-24h}
+      NEWS_SYNC_LIMIT: ${NEWS_SYNC_LIMIT:-10}
+
       TZ: ${TZ:-Europe/Moscow}
     ports:
       - "${APP_PORT:-8000}:8000"

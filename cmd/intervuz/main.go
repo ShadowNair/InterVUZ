@@ -23,16 +23,19 @@ import (
 	roomdelivery "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/room"
 	routedelivery "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/route"
 	scheduledelivery "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/schedule"
+	newsexternal "github.com/GIT_USER_ID/GIT_REPO_ID/internal/external/http/news"
 	scheduleexternal "github.com/GIT_USER_ID/GIT_REPO_ID/internal/external/http/schedule"
 	structureexternal "github.com/GIT_USER_ID/GIT_REPO_ID/internal/external/http/structure"
 	mid "github.com/GIT_USER_ID/GIT_REPO_ID/internal/middleware"
 	graphrepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/graph/memory"
+	newsrepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/news/postgres"
 	placerepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/place/memory"
 	roomrepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/room/memory"
 	schedulefilerepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/schedule/file"
 	schedulepgrepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/schedule/postgres"
 	structurerepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/structure/postgres"
 	graphusecase "github.com/GIT_USER_ID/GIT_REPO_ID/internal/usecase/graph"
+	newsusecase "github.com/GIT_USER_ID/GIT_REPO_ID/internal/usecase/news"
 	placeusecase "github.com/GIT_USER_ID/GIT_REPO_ID/internal/usecase/place"
 	roomusecase "github.com/GIT_USER_ID/GIT_REPO_ID/internal/usecase/room"
 	routeusecase "github.com/GIT_USER_ID/GIT_REPO_ID/internal/usecase/route"
@@ -73,6 +76,15 @@ func main() {
 		}
 
 		startPeriodicSync(appCtx, cfg, db)
+
+		if cfg.NewsSyncEnabled {
+			if err := syncNews(appCtx, cfg, db); err != nil {
+				log.Fatalf("startup news sync failed: %v", err)
+			}
+			startPeriodicNewsSync(appCtx, cfg, db)
+		} else {
+			log.Printf("news sync disabled")
+		}
 	}
 
 	places, err := bootstrap.LoadPlacesSeed(cfg.PlacesDataPath)
@@ -153,6 +165,10 @@ func main() {
 func parseFlags(cfg *config.Config) {
 	flag.BoolVar(&cfg.SyncOnStartup, "sync-on-startup", cfg.SyncOnStartup, "run structure and schedule sync during application startup")
 	flag.DurationVar(&cfg.SyncInterval, "sync-interval", cfg.SyncInterval, "background sync interval; set 0 to disable periodic sync")
+
+	flag.BoolVar(&cfg.NewsSyncEnabled, "sync-news", cfg.NewsSyncEnabled, "enable news sync on startup and periodically")
+	flag.DurationVar(&cfg.NewsSyncInterval, "news-sync-interval", cfg.NewsSyncInterval, "news sync interval; set 0 to disable periodic news sync")
+	flag.IntVar(&cfg.NewsSyncLimit, "news-sync-limit", cfg.NewsSyncLimit, "number of latest news items to sync")
 	flag.Parse()
 }
 
@@ -237,4 +253,57 @@ func loggingMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 		log.Printf("%s %s %s", r.Method, r.URL.Path, time.Since(startedAt))
 	})
+}
+
+func syncNews(appCtx context.Context, cfg config.Config, db *sql.DB) error {
+	if db == nil {
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(appCtx, 2*time.Minute)
+	defer cancel()
+
+	source := newsexternal.New(cfg.NewsAPIURL, nil)
+	repo := newsrepository.New(db)
+	uc := newsusecase.New(source, repo)
+
+	if err := uc.Sync(ctx, cfg.NewsSyncLimit); err != nil {
+		return err
+	}
+
+	log.Printf("news sync completed: latest %d items synced", cfg.NewsSyncLimit)
+	return nil
+}
+
+func startPeriodicNewsSync(appCtx context.Context, cfg config.Config, db *sql.DB) {
+	if db == nil {
+		return
+	}
+
+	if !cfg.NewsSyncEnabled {
+		return
+	}
+
+	if cfg.NewsSyncInterval <= 0 {
+		log.Printf("periodic news sync disabled")
+		return
+	}
+
+	log.Printf("periodic news sync enabled: interval=%s limit=%d", cfg.NewsSyncInterval, cfg.NewsSyncLimit)
+
+	go func() {
+		ticker := time.NewTicker(cfg.NewsSyncInterval)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-appCtx.Done():
+				return
+			case <-ticker.C:
+				if err := syncNews(appCtx, cfg, db); err != nil {
+					log.Printf("periodic news sync failed: %v", err)
+				}
+			}
+		}
+	}()
 }
