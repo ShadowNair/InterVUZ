@@ -26,6 +26,7 @@ type Coordinates struct {
 
 type Place struct {
 	ID           string      `json:"id"`
+	ExternalUUID string      `json:"externalUuid,omitempty"`
 	Name         string      `json:"name"`
 	Type         string      `json:"type"`
 	Description  string      `json:"description,omitempty"`
@@ -175,6 +176,59 @@ type RoomAvailability struct {
 
 type RoomAvailabilityResponse struct {
 	Items []RoomAvailability `json:"items"`
+}
+
+type RoomInfo struct {
+	RoomID    string   `json:"roomId"`
+	Name      string   `json:"name"`
+	Building  string   `json:"building"`
+	Floor     int      `json:"floor"`
+	Equipment []string `json:"equipment,omitempty"`
+}
+
+type RoomScheduleItem struct {
+	ID            string   `json:"id"`
+	Kind          string   `json:"kind"`
+	Title         string   `json:"title"`
+	StartsAt      string   `json:"startsAt"`
+	EndsAt        string   `json:"endsAt"`
+	StartTime     string   `json:"startTime"`
+	EndTime       string   `json:"endTime"`
+	Week          string   `json:"week,omitempty"`
+	Groups        []string `json:"groups,omitempty"`
+	Teachers      []string `json:"teachers,omitempty"`
+	BookerName    string   `json:"bookerName,omitempty"`
+	BookerContact string   `json:"bookerContact,omitempty"`
+}
+
+type RoomScheduleResponse struct {
+	Room  RoomInfo           `json:"room"`
+	Date  string             `json:"date"`
+	Items []RoomScheduleItem `json:"items"`
+}
+
+type RoomBookingRequest struct {
+	RoomID        string    `json:"roomId"`
+	StartsAt      time.Time `json:"startsAt"`
+	EndsAt        time.Time `json:"endsAt"`
+	BookerName    string    `json:"bookerName"`
+	BookerContact string    `json:"bookerContact"`
+}
+
+type CreateRoomBookingRequest struct {
+	StartsAt      string `json:"startsAt"`
+	BookerName    string `json:"bookerName"`
+	BookerContact string `json:"bookerContact"`
+}
+
+type RoomBooking struct {
+	ID            string `json:"id"`
+	RoomID        string `json:"roomId"`
+	RoomName      string `json:"roomName"`
+	StartsAt      string `json:"startsAt"`
+	EndsAt        string `json:"endsAt"`
+	BookerName    string `json:"bookerName"`
+	BookerContact string `json:"bookerContact"`
 }
 
 type ErrorResponse struct {

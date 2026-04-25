@@ -196,6 +196,10 @@ paths:
     get:
       tags: [Rooms]
       summary: Найти свободные аудитории
+      description: >
+        Возвращает аудитории с карты, свободные на интервал `startsAt + 90 минут`.
+        Параметр `endsAt` сохранен для обратной совместимости и может переопределить
+        конец интервала.
       parameters:
         - in: query
           name: startsAt
@@ -205,10 +209,10 @@ paths:
             format: date-time
         - in: query
           name: endsAt
-          required: true
           schema:
             type: string
             format: date-time
+          description: Необязательный конец интервала; если не передан, используется `startsAt + 90 минут`.
         - in: query
           name: building
           schema:
@@ -242,6 +246,73 @@ paths:
                 required: [items]
         '400':
           $ref: '#/components/responses/BadRequest'
+  /rooms/{roomId}/schedule:
+    get:
+      tags: [Rooms]
+      summary: Получить расписание аудитории
+      parameters:
+        - $ref: '#/components/parameters/RoomId'
+        - in: query
+          name: date
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Дата в формате YYYY-MM-DD.
+      responses:
+        '200':
+          description: Пары и брони аудитории на дату
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomScheduleResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /rooms/{roomId}/bookings:
+    post:
+      tags: [Rooms]
+      summary: Забронировать аудиторию на 90 минут
+      parameters:
+        - $ref: '#/components/parameters/RoomId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRoomBookingRequest'
+      responses:
+        '201':
+          description: Бронь создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomBooking'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Аудитория занята
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /rooms/bookings/{bookingId}:
+    delete:
+      tags: [Rooms]
+      summary: Отменить бронь аудитории
+      parameters:
+        - in: path
+          name: bookingId
+          required: true
+          schema:
+            type: string
+          description: Идентификатор брони.
+      responses:
+        '204':
+          description: Бронь отменена
+        '404':
+          $ref: '#/components/responses/NotFound'
   /image:
     get:
       tags: [Media]
@@ -302,6 +373,13 @@ components:
       schema:
         type: string
       description: Идентификатор события расписания
+    RoomId:
+      in: path
+      name: roomId
+      required: true
+      schema:
+        type: string
+      description: Идентификатор аудитории из `/places`
     GroupNodeType:
       in: query
       name: nodeType
@@ -360,6 +438,10 @@ components:
         id:
           type: string
           example: place_101
+        externalUuid:
+          type: string
+          nullable: true
+          description: UUID аудитории из внешнего расписания, если известен.
         name:
           type: string
           example: Аудитория 214
@@ -765,6 +847,104 @@ components:
         - capacity
         - availableFrom
         - availableTo
+    RoomInfo:
+      type: object
+      properties:
+        roomId:
+          type: string
+        name:
+          type: string
+        building:
+          type: string
+        floor:
+          type: integer
+        equipment:
+          type: array
+          items:
+            type: string
+      required: [roomId, name, building, floor]
+    RoomScheduleItem:
+      type: object
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+          enum: [lesson, booking]
+        title:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        startTime:
+          type: string
+          example: "10:10"
+        endTime:
+          type: string
+          example: "11:40"
+        week:
+          type: string
+          enum: [all, ch, zn]
+        groups:
+          type: array
+          items:
+            type: string
+        teachers:
+          type: array
+          items:
+            type: string
+        bookerName:
+          type: string
+        bookerContact:
+          type: string
+      required: [id, kind, title, startsAt, endsAt, startTime, endTime]
+    RoomScheduleResponse:
+      type: object
+      properties:
+        room:
+          $ref: '#/components/schemas/RoomInfo'
+        date:
+          type: string
+          format: date
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoomScheduleItem'
+      required: [room, date, items]
+    CreateRoomBookingRequest:
+      type: object
+      properties:
+        startsAt:
+          type: string
+          format: date-time
+        bookerName:
+          type: string
+        bookerContact:
+          type: string
+      required: [startsAt, bookerName, bookerContact]
+    RoomBooking:
+      type: object
+      properties:
+        id:
+          type: string
+        roomId:
+          type: string
+        roomName:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        bookerName:
+          type: string
+        bookerContact:
+          type: string
+      required: [id, roomId, roomName, startsAt, endsAt, bookerName, bookerContact]
     Error:
       type: object
       properties:

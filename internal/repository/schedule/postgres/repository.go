@@ -526,6 +526,9 @@ func (r *Repository) UpsertGroupSchedule(ctx context.Context, ownerGroupExternal
 		if err := replaceEventTeacherLinks(ctx, tx, eventID, event.Teachers); err != nil {
 			return saved, err
 		}
+		if err := replaceEventAudienceLinks(ctx, tx, eventID, event.Audiences); err != nil {
+			return saved, err
+		}
 		if _, err = tx.ExecContext(ctx, `
 			INSERT INTO schedule_source_events (source_id, event_id)
 			VALUES ($1, $2)
@@ -804,6 +807,55 @@ func replaceEventTeacherLinks(ctx context.Context, tx *sql.Tx, eventID string, t
 			ON CONFLICT DO NOTHING
 		`, eventID, teacherID); err != nil {
 			return fmt.Errorf("insert event teacher link: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func replaceEventAudienceLinks(ctx context.Context, tx *sql.Tx, eventID string, audiences []domain.Audience) error {
+	if _, err := tx.ExecContext(ctx, `DELETE FROM schedule_event_audiences WHERE event_id = $1`, eventID); err != nil {
+		return fmt.Errorf("clear event audiences: %w", err)
+	}
+
+	for _, audience := range audiences {
+		name := strings.TrimSpace(audience.Name)
+		normalizedRoom := domain.NormalizeRoomName(name)
+		if normalizedRoom == "" {
+			continue
+		}
+
+		metadataJSON, err := json.Marshal(audience)
+		if err != nil {
+			return fmt.Errorf("marshal event audience: %w", err)
+		}
+
+		if _, err := tx.ExecContext(ctx, `
+			INSERT INTO schedule_event_audiences (
+				event_id,
+				external_uuid,
+				name,
+				building,
+				normalized_room,
+				normalized_building,
+				metadata
+			)
+			VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)
+			ON CONFLICT (event_id, normalized_room, normalized_building) DO UPDATE SET
+				external_uuid = EXCLUDED.external_uuid,
+				name = EXCLUDED.name,
+				building = EXCLUDED.building,
+				metadata = EXCLUDED.metadata
+		`,
+			eventID,
+			nullableTrimmedString(audience.UUID),
+			name,
+			nullableTrimmedString(audience.Building),
+			normalizedRoom,
+			domain.NormalizeBuildingName(audience.Building),
+			string(metadataJSON),
+		); err != nil {
+			return fmt.Errorf("insert event audience link: %w", err)
 		}
 	}
 

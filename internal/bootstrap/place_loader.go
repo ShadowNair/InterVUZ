@@ -11,13 +11,15 @@ import (
 )
 
 type placeSeedRecord struct {
-	ID           string              `json:"id"`
-	Name         string              `json:"name"`
-	Type         string              `json:"type"`
-	Description  string              `json:"description"`
-	Coordinates  placeSeedCoordinate `json:"coordinates"`
-	Tags         []string            `json:"tags"`
-	IsAccessible bool                `json:"isAccessible"`
+	ID                   string              `json:"id"`
+	ExternalUUID         string              `json:"externalUuid"`
+	ExternalUUIDFallback string              `json:"external_uuid"`
+	Name                 string              `json:"name"`
+	Type                 string              `json:"type"`
+	Description          string              `json:"description"`
+	Coordinates          placeSeedCoordinate `json:"coordinates"`
+	Tags                 []string            `json:"tags"`
+	IsAccessible         bool                `json:"isAccessible"`
 }
 
 type placeSeedCoordinate struct {
@@ -41,10 +43,11 @@ func LoadPlacesSeed(path string) ([]domain.Place, error) {
 	places := make([]domain.Place, 0, len(records))
 	for _, record := range records {
 		places = append(places, domain.Place{
-			ID:          strings.TrimSpace(record.ID),
-			Name:        strings.TrimSpace(record.Name),
-			Type:        strings.TrimSpace(record.Type),
-			Description: strings.TrimSpace(record.Description),
+			ID:           strings.TrimSpace(record.ID),
+			ExternalUUID: firstNonEmpty(record.ExternalUUID, record.ExternalUUIDFallback),
+			Name:         strings.TrimSpace(record.Name),
+			Type:         strings.TrimSpace(record.Type),
+			Description:  strings.TrimSpace(record.Description),
 			Coordinates: domain.Coordinates{
 				Building: strings.TrimSpace(record.Coordinates.Building),
 				Floor:    record.Coordinates.Floor,
@@ -57,4 +60,15 @@ func LoadPlacesSeed(path string) ([]domain.Place, error) {
 	}
 
 	return places, nil
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value != "" {
+			return value
+		}
+	}
+
+	return ""
 }

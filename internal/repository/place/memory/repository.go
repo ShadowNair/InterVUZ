@@ -36,7 +36,7 @@ func (r *Repository) List(_ context.Context, filter domain.PlaceFilter) ([]domai
 		if filter.Type != "" && place.Type != filter.Type {
 			continue
 		}
-		if filter.Building != "" && !strings.EqualFold(place.Coordinates.Building, filter.Building) {
+		if filter.Building != "" && !buildingMatches(place.Coordinates.Building, filter.Building) {
 			continue
 		}
 		if filter.Floor != nil && place.Coordinates.Floor != *filter.Floor {
@@ -56,6 +56,28 @@ func (r *Repository) List(_ context.Context, filter domain.PlaceFilter) ([]domai
 	}
 
 	return filtered, nil
+}
+
+func buildingMatches(actual string, expected string) bool {
+	if strings.EqualFold(actual, expected) {
+		return true
+	}
+
+	return normalizeBuildingAlias(actual) == normalizeBuildingAlias(expected)
+}
+
+func normalizeBuildingAlias(value string) string {
+	value = strings.ToLower(strings.TrimSpace(value))
+	if len([]rune(value)) <= 1 {
+		return value
+	}
+
+	runes := []rune(value)
+	if (runes[0] == 'b' || runes[0] == 'б') && runes[1] >= '0' && runes[1] <= '9' {
+		return string(runes[1:])
+	}
+
+	return value
 }
 
 func (r *Repository) GetByID(_ context.Context, placeID string) (domain.Place, error) {

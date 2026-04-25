@@ -26,16 +26,18 @@ func (h *ListAvailabilityHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	endsAt, err := time.Parse(time.RFC3339, r.URL.Query().Get("endsAt"))
-	if err != nil {
-		httpjson.WriteError(w, http.StatusBadRequest, "bad_request", "endsAt must be RFC3339 datetime")
-		return
-	}
-
 	filter := domain.RoomAvailabilityFilter{
 		StartsAt: startsAt,
-		EndsAt:   endsAt,
 		Building: r.URL.Query().Get("building"),
+	}
+
+	if endsAtRaw := r.URL.Query().Get("endsAt"); endsAtRaw != "" {
+		endsAt, err := time.Parse(time.RFC3339, endsAtRaw)
+		if err != nil {
+			httpjson.WriteError(w, http.StatusBadRequest, "bad_request", "endsAt must be RFC3339 datetime")
+			return
+		}
+		filter.EndsAt = endsAt
 	}
 
 	if capacityRaw := r.URL.Query().Get("capacity"); capacityRaw != "" {

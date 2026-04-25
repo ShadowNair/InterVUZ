@@ -30,7 +30,8 @@ import (
 	graphrepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/graph/memory"
 	newsrepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/news/postgres"
 	placerepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/place/memory"
-	roomrepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/room/memory"
+	roommemoryrepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/room/memory"
+	roompgrepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/room/postgres"
 	schedulefilerepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/schedule/file"
 	schedulepgrepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/schedule/postgres"
 	structurerepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/structure/postgres"
@@ -47,12 +48,15 @@ import (
 func main() {
 	cfg := config.Load()
 	parseFlags(&cfg)
+	academicWeek1Start, err := parseAcademicWeek1StartDate(cfg.AcademicWeek1StartDate)
+	if err != nil {
+		log.Fatalf("bad ACADEMIC_WEEK1_START_DATE: %v", err)
+	}
 
 	appCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
 	var db *sql.DB
-	var err error
 	if cfg.DatabaseDSN != "" {
 		db, err = sql.Open("pgx", cfg.DatabaseDSN)
 		if err != nil {
@@ -104,7 +108,12 @@ func main() {
 
 	placeRepo := placerepository.New(places)
 	graphRepo := graphrepository.New(places)
-	roomRepo := roomrepository.New()
+	var roomRepo roomusecase.Repository
+	if db != nil {
+		roomRepo = roompgrepository.New(db, places, academicWeek1Start)
+	} else {
+		roomRepo = roommemoryrepository.New(places)
+	}
 
 	placeUseCase := placeusecase.New(placeRepo)
 	graphUseCase := graphusecase.New(graphRepo)
@@ -123,6 +132,9 @@ func main() {
 	groupScheduleHandler := scheduledelivery.NewGroupScheduleHandler(scheduleUseCase)
 	eventHandler := scheduledelivery.NewEventHandler(scheduleUseCase)
 	roomListAvailabilityHandler := roomdelivery.NewListAvailabilityHandler(roomUseCase)
+	roomGetScheduleHandler := roomdelivery.NewGetScheduleHandler(roomUseCase)
+	roomCreateBookingHandler := roomdelivery.NewCreateBookingHandler(roomUseCase)
+	roomCancelBookingHandler := roomdelivery.NewCancelBookingHandler(roomUseCase)
 
 	mux := http.NewServeMux()
 	mux.Handle("GET /health", healthHandler)
@@ -136,6 +148,9 @@ func main() {
 	mux.Handle("GET /users/schedule/events/{eventID}", eventHandler)
 	mux.Handle("GET /users/schedule/{groupID}", groupScheduleHandler)
 	mux.Handle("GET /rooms/availability", roomListAvailabilityHandler)
+	mux.Handle("GET /rooms/{roomID}/schedule", roomGetScheduleHandler)
+	mux.Handle("POST /rooms/{roomID}/bookings", roomCreateBookingHandler)
+	mux.Handle("DELETE /rooms/bookings/{bookingID}", roomCancelBookingHandler)
 
 	corsMiddleware := mid.CORS(nil)
 	handler := corsMiddleware(loggingMiddleware(mux))
@@ -170,6 +185,19 @@ func parseFlags(cfg *config.Config) {
 	flag.DurationVar(&cfg.NewsSyncInterval, "news-sync-interval", cfg.NewsSyncInterval, "news sync interval; set 0 to disable periodic news sync")
 	flag.IntVar(&cfg.NewsSyncLimit, "news-sync-limit", cfg.NewsSyncLimit, "number of latest news items to sync")
 	flag.Parse()
+}
+
+func parseAcademicWeek1StartDate(value string) (time.Time, error) {
+	if value == "" {
+		return time.Time{}, errors.New("ACADEMIC_WEEK1_START_DATE is required")
+	}
+
+	parsed, err := time.ParseInLocation("2006-01-02", value, time.Local)
+	if err != nil {
+		return time.Time{}, errors.New("must be YYYY-MM-DD")
+	}
+
+	return parsed, nil
 }
 
 func startPeriodicSync(appCtx context.Context, cfg config.Config, db *sql.DB) {

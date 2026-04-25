@@ -12,6 +12,7 @@ type Config struct {
 	PlacesDataPath          string
 	ScheduleDataDir         string
 	DatabaseDSN             string
+	AcademicWeek1StartDate  string
 	StructureAPIURL         string
 	ScheduleGroupAPIBaseURL string
 	StructureTargetRootUUID string
@@ -31,6 +32,7 @@ func Load() Config {
 		PlacesDataPath:          getenv("PLACES_DATA_PATH", ""),
 		ScheduleDataDir:         getenv("SCHEDULE_DATA_DIR", ""),
 		DatabaseDSN:             getenv("DATABASE_DSN", ""),
+		AcademicWeek1StartDate:  getenv("ACADEMIC_WEEK1_START_DATE", ""),
 		StructureAPIURL:         getenv("STRUCTURE_API_URL", "https://lks.bmstu.ru/lks-back/api/v1/structure"),
 		ScheduleGroupAPIBaseURL: getenv("SCHEDULE_GROUP_API_BASE_URL", "https://lks.bmstu.ru/lks-back/api/v1/schedules/groups"),
 		StructureTargetRootUUID: getenv("STRUCTURE_TARGET_ROOT_UUID", "8c1b7bb8-e690-11db-89c3-000cf1a7cbf0"),
