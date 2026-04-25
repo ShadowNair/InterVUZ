@@ -19,6 +19,7 @@ import (
 	graphdelivery "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/graph"
 	healthdelivery "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/health"
 	imagedelivery "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/image"
+	newsdelivery "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/news"
 	placedelivery "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/place"
 	roomdelivery "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/room"
 	routedelivery "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/route"
@@ -27,6 +28,7 @@ import (
 	scheduleexternal "github.com/GIT_USER_ID/GIT_REPO_ID/internal/external/http/schedule"
 	structureexternal "github.com/GIT_USER_ID/GIT_REPO_ID/internal/external/http/structure"
 	mid "github.com/GIT_USER_ID/GIT_REPO_ID/internal/middleware"
+	"github.com/GIT_USER_ID/GIT_REPO_ID/internal/platform/httpjson"
 	graphrepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/graph/memory"
 	newsrepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/news/postgres"
 	placerepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/place/memory"
@@ -135,10 +137,19 @@ func main() {
 	roomGetScheduleHandler := roomdelivery.NewGetScheduleHandler(roomUseCase)
 	roomCreateBookingHandler := roomdelivery.NewCreateBookingHandler(roomUseCase)
 	roomCancelBookingHandler := roomdelivery.NewCancelBookingHandler(roomUseCase)
+	var newsListHandler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		httpjson.WriteError(w, http.StatusServiceUnavailable, "service_unavailable", "news storage is not configured")
+	})
+	if db != nil {
+		newsRepo := newsrepository.New(db)
+		newsUseCase := newsusecase.New(nil, newsRepo)
+		newsListHandler = newsdelivery.NewListHandler(newsUseCase)
+	}
 
 	mux := http.NewServeMux()
 	mux.Handle("GET /health", healthHandler)
 	mux.Handle("GET /image", imageHandler)
+	mux.Handle("GET /news", newsListHandler)
 	mux.Handle("GET /places", placeListHandler)
 	mux.Handle("GET /places/{placeID}", placeGetHandler)
 	mux.Handle("GET /graph", graphGetHandler)

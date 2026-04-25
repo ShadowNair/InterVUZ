@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 
 	"github.com/GIT_USER_ID/GIT_REPO_ID/internal/domain"
@@ -50,6 +51,77 @@ func (r *Repository) SaveMany(ctx context.Context, items []domain.NewsRecord) (e
 	}
 
 	return nil
+}
+
+func (r *Repository) List(ctx context.Context, limit int) ([]domain.NewsRecord, error) {
+	if limit <= 0 {
+		limit = 20
+	}
+
+	const query = `
+		SELECT
+			n.slug,
+			n.title,
+			COALESCE(n.preview_text, ''),
+			n.published_date,
+			COALESCE(n.image_preview, ''),
+			n.page_url,
+			COALESCE(
+				jsonb_agg(
+					jsonb_build_object(
+						'id', t.id,
+						'slug', t.slug,
+						'title', t.title,
+						'color', t.color
+					)
+					ORDER BY t.title
+				) FILTER (WHERE t.id IS NOT NULL),
+				'[]'::jsonb
+			) AS tags
+		FROM news n
+		LEFT JOIN news_tags nt ON nt.news_id = n.id
+		LEFT JOIN tags t ON t.id = nt.tag_id
+		GROUP BY n.id
+		ORDER BY n.published_date DESC, n.id DESC
+		LIMIT $1
+	`
+
+	rows, err := r.db.QueryContext(ctx, query, limit)
+	if err != nil {
+		return nil, fmt.Errorf("query news: %w", err)
+	}
+	defer rows.Close()
+
+	items := make([]domain.NewsRecord, 0, limit)
+	for rows.Next() {
+		var (
+			item    domain.NewsRecord
+			tagsRaw []byte
+		)
+
+		if err := rows.Scan(
+			&item.Slug,
+			&item.Title,
+			&item.PreviewText,
+			&item.PublishedDate,
+			&item.ImagePreview,
+			&item.PageURL,
+			&tagsRaw,
+		); err != nil {
+			return nil, fmt.Errorf("scan news: %w", err)
+		}
+
+		if err := json.Unmarshal(tagsRaw, &item.Tags); err != nil {
+			return nil, fmt.Errorf("decode news tags for %s: %w", item.Slug, err)
+		}
+
+		items = append(items, item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate news: %w", err)
+	}
+
+	return items, nil
 }
 
 func upsertNews(ctx context.Context, tx *sql.Tx, item domain.NewsRecord) (int64, error) {

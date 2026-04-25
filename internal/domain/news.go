@@ -11,7 +11,7 @@ type NewsItem struct {
 	Title        string      `json:"title"`
 	PreviewText  string      `json:"preview_text"`
 	PublishedAt  PublishedAt `json:"published_at"`
-	ImagePreview string      `json:"image_preview"`
+	ImagePreview string      `json:"imagePreview"`
 	Tags         []Tag       `json:"tags"`
 	PageURL      string      `json:"page_url"`
 }

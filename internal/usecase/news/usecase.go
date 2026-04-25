@@ -13,6 +13,7 @@ type Source interface {
 
 type Repository interface {
 	SaveMany(ctx context.Context, items []domain.NewsRecord) error
+	List(ctx context.Context, limit int) ([]domain.NewsRecord, error)
 }
 
 type UseCase struct {
@@ -47,4 +48,25 @@ func (u *UseCase) Sync(ctx context.Context, limit int) error {
 	}
 
 	return nil
+}
+
+func (u *UseCase) List(ctx context.Context, limit int) (*domain.NewsResponse, error) {
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	records, err := u.repo.List(ctx, limit)
+	if err != nil {
+		return nil, fmt.Errorf("list news: %w", err)
+	}
+
+	items := make([]domain.NewsItem, 0, len(records))
+	for _, record := range records {
+		items = append(items, ToNewsItem(record))
+	}
+
+	return &domain.NewsResponse{Items: items}, nil
 }

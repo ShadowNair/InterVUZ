@@ -52,53 +52,11 @@ func (r *Repository) UpsertMany(ctx context.Context, items []domain.StructureUni
 			updated_at           = NOW()
 	`
 
-	const upsertAcademicGroup = `
-		INSERT INTO academic_groups (
-			external_uuid,
-			code,
-			name,
-			faculty_name,
-			department_name,
-			course,
-			semester,
-			faculty_external_uuid,
-			faculty_code,
-			department_external_uuid,
-			department_code,
-			course_node_external_uuid,
-			course_node_name,
-			raw_payload,
-			updated_at
-		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW())
-		ON CONFLICT (external_uuid) DO UPDATE SET
-			code                    = EXCLUDED.code,
-			name                    = EXCLUDED.name,
-			faculty_name            = EXCLUDED.faculty_name,
-			department_name         = EXCLUDED.department_name,
-			course                  = EXCLUDED.course,
-			semester                = EXCLUDED.semester,
-			faculty_external_uuid   = EXCLUDED.faculty_external_uuid,
-			faculty_code            = EXCLUDED.faculty_code,
-			department_external_uuid= EXCLUDED.department_external_uuid,
-			department_code         = EXCLUDED.department_code,
-			course_node_external_uuid = EXCLUDED.course_node_external_uuid,
-			course_node_name        = EXCLUDED.course_node_name,
-			raw_payload             = EXCLUDED.raw_payload,
-			updated_at              = NOW()
-	`
-
 	unitStmt, err := tx.PrepareContext(ctx, upsertStructureUnit)
 	if err != nil {
 		return fmt.Errorf("prepare structure_units statement: %w", err)
 	}
 	defer unitStmt.Close()
-
-	groupStmt, err := tx.PrepareContext(ctx, upsertAcademicGroup)
-	if err != nil {
-		return fmt.Errorf("prepare academic_groups statement: %w", err)
-	}
-	defer groupStmt.Close()
 
 	for _, item := range items {
 		_, err = unitStmt.ExecContext(
@@ -114,31 +72,6 @@ func (r *Repository) UpsertMany(ctx context.Context, items []domain.StructureUni
 		)
 		if err != nil {
 			return fmt.Errorf("upsert structure unit %s: %w", item.ExternalUUID, err)
-		}
-
-		if item.NodeType != "group" {
-			continue
-		}
-
-		_, err = groupStmt.ExecContext(
-			ctx,
-			item.ExternalUUID,
-			item.Code,
-			item.Name,
-			nullableString(item.FacultyName),
-			nullableString(item.DepartmentName),
-			nullableInt(item.Course),
-			nullableInt(item.Semester),
-			nullableString(item.FacultyExternalUUID),
-			nullableString(item.FacultyCode),
-			nullableString(item.DepartmentExternalUUID),
-			nullableString(item.DepartmentCode),
-			nullableString(item.CourseNodeExternalUUID),
-			nullableString(item.CourseNodeName),
-			item.RawPayload,
-		)
-		if err != nil {
-			return fmt.Errorf("upsert academic group %s: %w", item.ExternalUUID, err)
 		}
 	}
 

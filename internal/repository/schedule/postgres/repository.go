@@ -443,27 +443,28 @@ func (r *Repository) loadEventTeachers(ctx context.Context, eventID string) ([]d
 func (r *Repository) ListGroupExternalUUIDs(ctx context.Context) ([]string, error) {
 	query := `
 		SELECT external_uuid
-		FROM academic_groups
+		FROM structure_units
 		WHERE external_uuid IS NOT NULL
+		  AND node_type = 'group'
 		ORDER BY code
 	`
 	args := []any{}
 	if r.targetRootExternal != "" {
 		query = `
 			WITH RECURSIVE descendants AS (
-				SELECT external_uuid
+				SELECT external_uuid, code, node_type
 				FROM structure_units
 				WHERE external_uuid = $1
 				UNION ALL
-				SELECT su.external_uuid
+				SELECT su.external_uuid, su.code, su.node_type
 				FROM structure_units su
 				JOIN descendants d ON su.parent_external_uuid = d.external_uuid
 			)
-			SELECT ag.external_uuid
-			FROM academic_groups ag
-			JOIN descendants d ON d.external_uuid = ag.external_uuid
-			WHERE ag.external_uuid IS NOT NULL
-			ORDER BY ag.code
+			SELECT external_uuid
+			FROM descendants
+			WHERE external_uuid IS NOT NULL
+			  AND node_type = 'group'
+			ORDER BY code
 		`
 		args = append(args, r.targetRootExternal)
 	}
@@ -489,6 +490,43 @@ func (r *Repository) ListGroupExternalUUIDs(ctx context.Context) ([]string, erro
 	return result, nil
 }
 
+func (r *Repository) ReplaceScheduledGroups(ctx context.Context, checkedGroupExternalUUIDs []string, scheduledGroupExternalUUIDs []string) (err error) {
+	checkedGroupExternalUUIDs = uniqueNonEmptyStrings(checkedGroupExternalUUIDs)
+	scheduledGroupExternalUUIDs = uniqueNonEmptyStrings(scheduledGroupExternalUUIDs)
+	if len(checkedGroupExternalUUIDs) == 0 && len(scheduledGroupExternalUUIDs) == 0 {
+		return nil
+	}
+
+	checkedJSON, err := marshalStringList(checkedGroupExternalUUIDs)
+	if err != nil {
+		return fmt.Errorf("marshal checked group list: %w", err)
+	}
+	scheduledJSON, err := marshalStringList(scheduledGroupExternalUUIDs)
+	if err != nil {
+		return fmt.Errorf("marshal scheduled group list: %w", err)
+	}
+
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin tx: %w", err)
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	if err = cleanupGroupsWithoutSchedules(ctx, tx, checkedJSON, scheduledJSON); err != nil {
+		return err
+	}
+
+	if err = tx.Commit(); err != nil {
+		return fmt.Errorf("commit tx: %w", err)
+	}
+
+	return nil
+}
+
 func (r *Repository) UpsertGroupSchedule(ctx context.Context, ownerGroupExternalUUID string, payload *domain.GroupScheduleResponse) (saved int, err error) {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -499,6 +537,32 @@ func (r *Repository) UpsertGroupSchedule(ctx context.Context, ownerGroupExternal
 			_ = tx.Rollback()
 		}
 	}()
+
+	if payload == nil || len(payload.Data.Schedule) == 0 {
+		checkedJSON, marshalErr := marshalStringList([]string{ownerGroupExternalUUID})
+		if marshalErr != nil {
+			return 0, fmt.Errorf("marshal empty schedule group: %w", marshalErr)
+		}
+		emptyScheduledJSON, marshalErr := marshalStringList(nil)
+		if marshalErr != nil {
+			return 0, fmt.Errorf("marshal empty scheduled groups: %w", marshalErr)
+		}
+		if err = cleanupGroupsWithoutSchedules(ctx, tx, checkedJSON, emptyScheduledJSON); err != nil {
+			return 0, err
+		}
+		if err = tx.Commit(); err != nil {
+			return 0, fmt.Errorf("commit tx: %w", err)
+		}
+		return 0, nil
+	}
+
+	ownerGroupJSON, err := marshalStringList([]string{ownerGroupExternalUUID})
+	if err != nil {
+		return 0, fmt.Errorf("marshal owner group: %w", err)
+	}
+	if err = materializeAcademicGroups(ctx, tx, ownerGroupJSON); err != nil {
+		return 0, err
+	}
 
 	sourceID, err := upsertScheduleSource(ctx, tx, ownerGroupExternalUUID, payload)
 	if err != nil {
@@ -540,16 +604,8 @@ func (r *Repository) UpsertGroupSchedule(ctx context.Context, ownerGroupExternal
 		saved++
 	}
 
-	if _, err = tx.ExecContext(ctx, `
-		DELETE FROM schedule_events se
-		WHERE se.source_id = $1
-		  AND NOT EXISTS (
-				SELECT 1
-				FROM schedule_source_events sse
-				WHERE sse.event_id = se.id
-		  )
-	`, sourceID); err != nil {
-		return saved, fmt.Errorf("cleanup orphan events: %w", err)
+	if err = cleanupUnlinkedGroupSyncEvents(ctx, tx); err != nil {
+		return saved, err
 	}
 
 	if err = tx.Commit(); err != nil {
@@ -557,6 +613,231 @@ func (r *Repository) UpsertGroupSchedule(ctx context.Context, ownerGroupExternal
 	}
 
 	return saved, nil
+}
+
+func materializeAcademicGroups(ctx context.Context, tx *sql.Tx, scheduledGroupUUIDsJSON string) error {
+	_, err := tx.ExecContext(ctx, `
+		WITH RECURSIVE scheduled AS (
+			SELECT DISTINCT trim(value) AS external_uuid
+			FROM jsonb_array_elements_text($1::jsonb) AS value
+			WHERE trim(value) <> ''
+		), group_units AS (
+			SELECT su.*
+			FROM structure_units su
+			JOIN scheduled s ON s.external_uuid = su.external_uuid
+			WHERE su.node_type = 'group'
+		), ancestors AS (
+			SELECT
+				gu.external_uuid AS group_uuid,
+				parent.external_uuid,
+				parent.parent_external_uuid,
+				parent.code,
+				parent.name,
+				parent.node_type,
+				1 AS depth
+			FROM group_units gu
+			JOIN structure_units parent ON parent.external_uuid = gu.parent_external_uuid
+			UNION ALL
+			SELECT
+				a.group_uuid,
+				parent.external_uuid,
+				parent.parent_external_uuid,
+				parent.code,
+				parent.name,
+				parent.node_type,
+				a.depth + 1
+			FROM ancestors a
+			JOIN structure_units parent ON parent.external_uuid = a.parent_external_uuid
+		), decorated AS (
+			SELECT
+				gu.external_uuid,
+				gu.code,
+				gu.name,
+				gu.course,
+				gu.semester,
+				gu.raw_payload,
+				(
+					SELECT a.external_uuid
+					FROM ancestors a
+					WHERE a.group_uuid = gu.external_uuid AND a.node_type = 'faculty'
+					ORDER BY a.depth
+					LIMIT 1
+				) AS faculty_external_uuid,
+				(
+					SELECT a.code
+					FROM ancestors a
+					WHERE a.group_uuid = gu.external_uuid AND a.node_type = 'faculty'
+					ORDER BY a.depth
+					LIMIT 1
+				) AS faculty_code,
+				(
+					SELECT a.name
+					FROM ancestors a
+					WHERE a.group_uuid = gu.external_uuid AND a.node_type = 'faculty'
+					ORDER BY a.depth
+					LIMIT 1
+				) AS faculty_name,
+				(
+					SELECT a.external_uuid
+					FROM ancestors a
+					WHERE a.group_uuid = gu.external_uuid AND a.node_type = 'department'
+					ORDER BY a.depth
+					LIMIT 1
+				) AS department_external_uuid,
+				(
+					SELECT a.code
+					FROM ancestors a
+					WHERE a.group_uuid = gu.external_uuid AND a.node_type = 'department'
+					ORDER BY a.depth
+					LIMIT 1
+				) AS department_code,
+				(
+					SELECT a.name
+					FROM ancestors a
+					WHERE a.group_uuid = gu.external_uuid AND a.node_type = 'department'
+					ORDER BY a.depth
+					LIMIT 1
+				) AS department_name,
+				(
+					SELECT a.external_uuid
+					FROM ancestors a
+					WHERE a.group_uuid = gu.external_uuid AND a.node_type = 'course'
+					ORDER BY a.depth
+					LIMIT 1
+				) AS course_node_external_uuid,
+				(
+					SELECT a.name
+					FROM ancestors a
+					WHERE a.group_uuid = gu.external_uuid AND a.node_type = 'course'
+					ORDER BY a.depth
+					LIMIT 1
+				) AS course_node_name
+			FROM group_units gu
+		)
+		INSERT INTO academic_groups (
+			external_uuid,
+			code,
+			name,
+			faculty_name,
+			department_name,
+			course,
+			semester,
+			faculty_external_uuid,
+			faculty_code,
+			department_external_uuid,
+			department_code,
+			course_node_external_uuid,
+			course_node_name,
+			raw_payload,
+			updated_at
+		)
+		SELECT
+			external_uuid,
+			code,
+			name,
+			faculty_name,
+			department_name,
+			course,
+			semester,
+			faculty_external_uuid,
+			faculty_code,
+			department_external_uuid,
+			department_code,
+			course_node_external_uuid,
+			course_node_name,
+			raw_payload,
+			NOW()
+		FROM decorated
+		ON CONFLICT (external_uuid) DO UPDATE SET
+			code                    = EXCLUDED.code,
+			name                    = EXCLUDED.name,
+			faculty_name            = EXCLUDED.faculty_name,
+			department_name         = EXCLUDED.department_name,
+			course                  = EXCLUDED.course,
+			semester                = EXCLUDED.semester,
+			faculty_external_uuid   = EXCLUDED.faculty_external_uuid,
+			faculty_code            = EXCLUDED.faculty_code,
+			department_external_uuid= EXCLUDED.department_external_uuid,
+			department_code         = EXCLUDED.department_code,
+			course_node_external_uuid = EXCLUDED.course_node_external_uuid,
+			course_node_name        = EXCLUDED.course_node_name,
+			raw_payload             = EXCLUDED.raw_payload,
+			updated_at              = NOW()
+	`, scheduledGroupUUIDsJSON)
+	if err != nil {
+		return fmt.Errorf("materialize scheduled groups: %w", err)
+	}
+
+	return nil
+}
+
+func cleanupGroupsWithoutSchedules(ctx context.Context, tx *sql.Tx, checkedGroupUUIDsJSON string, scheduledGroupUUIDsJSON string) error {
+	if _, err := tx.ExecContext(ctx, `
+		WITH checked AS (
+			SELECT DISTINCT trim(value) AS external_uuid
+			FROM jsonb_array_elements_text($1::jsonb) AS value
+			WHERE trim(value) <> ''
+		), scheduled AS (
+			SELECT DISTINCT trim(value) AS external_uuid
+			FROM jsonb_array_elements_text($2::jsonb) AS value
+			WHERE trim(value) <> ''
+		), unscheduled AS (
+			SELECT c.external_uuid
+			FROM checked c
+			LEFT JOIN scheduled s ON s.external_uuid = c.external_uuid
+			WHERE s.external_uuid IS NULL
+		)
+		DELETE FROM schedule_sources ss
+		USING unscheduled u
+		WHERE ss.source_type = 'group_sync'
+		  AND ss.external_reference = u.external_uuid
+	`, checkedGroupUUIDsJSON, scheduledGroupUUIDsJSON); err != nil {
+		return fmt.Errorf("cleanup unscheduled schedule sources: %w", err)
+	}
+
+	if _, err := tx.ExecContext(ctx, `
+		WITH checked AS (
+			SELECT DISTINCT trim(value) AS external_uuid
+			FROM jsonb_array_elements_text($1::jsonb) AS value
+			WHERE trim(value) <> ''
+		), scheduled AS (
+			SELECT DISTINCT trim(value) AS external_uuid
+			FROM jsonb_array_elements_text($2::jsonb) AS value
+			WHERE trim(value) <> ''
+		), unscheduled AS (
+			SELECT c.external_uuid
+			FROM checked c
+			LEFT JOIN scheduled s ON s.external_uuid = c.external_uuid
+			WHERE s.external_uuid IS NULL
+		)
+		DELETE FROM academic_groups ag
+		USING unscheduled u
+		WHERE ag.external_uuid = u.external_uuid
+	`, checkedGroupUUIDsJSON, scheduledGroupUUIDsJSON); err != nil {
+		return fmt.Errorf("cleanup unscheduled groups: %w", err)
+	}
+
+	if err := cleanupUnlinkedGroupSyncEvents(ctx, tx); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func cleanupUnlinkedGroupSyncEvents(ctx context.Context, tx *sql.Tx) error {
+	if _, err := tx.ExecContext(ctx, `
+		DELETE FROM schedule_events se
+		WHERE se.external_id LIKE 'group-sync-%'
+		  AND NOT EXISTS (
+				SELECT 1
+				FROM schedule_source_events sse
+				WHERE sse.event_id = se.id
+		  )
+	`); err != nil {
+		return fmt.Errorf("cleanup orphan events: %w", err)
+	}
+
+	return nil
 }
 
 func upsertScheduleSource(ctx context.Context, tx *sql.Tx, ownerGroupExternalUUID string, payload *domain.GroupScheduleResponse) (string, error) {
@@ -1011,4 +1292,29 @@ func firstNonEmpty(values ...string) string {
 		}
 	}
 	return ""
+}
+
+func uniqueNonEmptyStrings(values []string) []string {
+	result := make([]string, 0, len(values))
+	seen := make(map[string]struct{}, len(values))
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value == "" {
+			continue
+		}
+		if _, ok := seen[value]; ok {
+			continue
+		}
+		seen[value] = struct{}{}
+		result = append(result, value)
+	}
+	return result
+}
+
+func marshalStringList(values []string) (string, error) {
+	raw, err := json.Marshal(uniqueNonEmptyStrings(values))
+	if err != nil {
+		return "", err
+	}
+	return string(raw), nil
 }

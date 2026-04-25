@@ -24,6 +24,21 @@ var months = map[string]time.Month{
 	"декабря":  time.December,
 }
 
+var monthNames = map[time.Month]string{
+	time.January:   "января",
+	time.February:  "февраля",
+	time.March:     "марта",
+	time.April:     "апреля",
+	time.May:       "мая",
+	time.June:      "июня",
+	time.July:      "июля",
+	time.August:    "августа",
+	time.September: "сентября",
+	time.October:   "октября",
+	time.November:  "ноября",
+	time.December:  "декабря",
+}
+
 func ToNewsRecord(item domain.NewsItem) (domain.NewsRecord, error) {
 	publishedDate, err := parsePublishedAt(item.PublishedAt)
 	if err != nil {
@@ -39,6 +54,18 @@ func ToNewsRecord(item domain.NewsItem) (domain.NewsRecord, error) {
 		PageURL:       item.PageURL,
 		Tags:          item.Tags,
 	}, nil
+}
+
+func ToNewsItem(record domain.NewsRecord) domain.NewsItem {
+	return domain.NewsItem{
+		Slug:         record.Slug,
+		Title:        record.Title,
+		PreviewText:  record.PreviewText,
+		PublishedAt:  toPublishedAt(record.PublishedDate),
+		ImagePreview: record.ImagePreview,
+		Tags:         record.Tags,
+		PageURL:      record.PageURL,
+	}
 }
 
 func parsePublishedAt(p domain.PublishedAt) (time.Time, error) {
@@ -59,4 +86,17 @@ func parsePublishedAt(p domain.PublishedAt) (time.Time, error) {
 	}
 
 	return time.Date(year, month, day, 0, 0, 0, 0, time.UTC), nil
+}
+
+func toPublishedAt(value time.Time) domain.PublishedAt {
+	month := monthNames[value.Month()]
+	if month == "" {
+		month = strings.ToLower(value.Month().String())
+	}
+
+	return domain.PublishedAt{
+		Day:   strconv.Itoa(value.Day()),
+		Month: month,
+		Year:  strconv.Itoa(value.Year()),
+	}
 }

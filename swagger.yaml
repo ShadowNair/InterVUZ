@@ -19,6 +19,8 @@ tags:
     description: Получение расписания и каталога учебных групп
   - name: Rooms
     description: Поиск свободных аудиторий
+  - name: News
+    description: Новости университета
   - name: Media
     description: Отдача медиафайлов для фронтенда
 paths:
@@ -313,6 +315,27 @@ paths:
           description: Бронь отменена
         '404':
           $ref: '#/components/responses/NotFound'
+  /news:
+    get:
+      tags: [News]
+      summary: Получить список новостей
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Список новостей
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
   /image:
     get:
       tags: [Media]
@@ -945,6 +968,60 @@ components:
         bookerContact:
           type: string
       required: [id, roomId, roomName, startsAt, endsAt, bookerName, bookerContact]
+    NewsResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/NewsItem'
+      required: [items]
+    NewsItem:
+      type: object
+      properties:
+        slug:
+          type: string
+        title:
+          type: string
+        preview_text:
+          type: string
+        published_at:
+          $ref: '#/components/schemas/PublishedAt'
+        image_preview:
+          type: string
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/NewsTag'
+        page_url:
+          type: string
+      required: [slug, title, published_at, tags, page_url]
+    PublishedAt:
+      type: object
+      properties:
+        day:
+          type: string
+          example: "13"
+        month:
+          type: string
+          example: апреля
+        year:
+          type: string
+          example: "2026"
+      required: [day, month, year]
+    NewsTag:
+      type: object
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        title:
+          type: string
+        color:
+          type: string
+          example: "#10aa00"
+      required: [id, slug, title, color]
     Error:
       type: object
       properties:
