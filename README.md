@@ -1,12 +1,31 @@
-Для запуска с загрузкой данных в БД и обновления каждые 72 часа:
-```
-ACADEMIC_WEEK1_START_DATE=2026-02-09 SYNC_ON_STARTUP=true SYNC_INTERVAL=72h docker compose up --build
+# InterVUZ Backend
+
+## Run with Docker
+
+1. Create local env file:
+
+```bash
+cp .env.example .env
 ```
 
-Если БД полная и для ускорения запуска(если расписание не нужно)
-```
-ACADEMIC_WEEK1_START_DATE=2026-02-09 docker compose up --build
+On Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
 ```
 
-`ACADEMIC_WEEK1_START_DATE` — понедельник первой учебной недели. По нему backend
-определяет числитель (`ch`) и знаменатель (`zn`) для расписания аудиторий.
+2. Fill required values in `.env`:
+- `ASSISTANT_API_KEY`
+- `ACADEMIC_WEEK1_START_DATE` (format `YYYY-MM-DD`, Monday of week 1)
+
+3. Start:
+
+```bash
+docker compose up --build
+```
+
+Optional startup sync every 72h:
+
+```bash
+SYNC_ON_STARTUP=true SYNC_INTERVAL=72h docker compose up --build
+```

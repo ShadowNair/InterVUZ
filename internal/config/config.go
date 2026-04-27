@@ -23,6 +23,12 @@ type Config struct {
 	NewsSyncEnabled  bool
 	NewsSyncInterval time.Duration
 	NewsSyncLimit    int
+
+	AssistantBaseURL         string
+	AssistantAPIKey          string
+	AssistantModel           string
+	AssistantTimeout         time.Duration
+	AssistantContextMaxChars int
 }
 
 func Load() Config {
@@ -43,6 +49,12 @@ func Load() Config {
 		NewsSyncEnabled:  getBoolEnv("NEWS_SYNC_ENABLED", false),
 		NewsSyncInterval: getDurationEnv("NEWS_SYNC_INTERVAL", 24*time.Hour),
 		NewsSyncLimit:    getIntEnv("NEWS_SYNC_LIMIT", 10),
+
+		AssistantBaseURL:         getenv("ASSISTANT_BASE_URL", "https://polza.ai/api/v1"),
+		AssistantAPIKey:          getenv("ASSISTANT_API_KEY", ""),
+		AssistantModel:           getenv("ASSISTANT_MODEL", "gpt-4o-mini"),
+		AssistantTimeout:         getDurationEnv("ASSISTANT_TIMEOUT", 30*time.Second),
+		AssistantContextMaxChars: getIntEnv("ASSISTANT_CONTEXT_MAX_CHARS", 120000),
 	}
 }
 

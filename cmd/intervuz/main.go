@@ -16,6 +16,7 @@ import (
 
 	"github.com/GIT_USER_ID/GIT_REPO_ID/internal/bootstrap"
 	"github.com/GIT_USER_ID/GIT_REPO_ID/internal/config"
+	assistantdelivery "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/assistant"
 	graphdelivery "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/graph"
 	healthdelivery "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/health"
 	imagedelivery "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/image"
@@ -24,6 +25,7 @@ import (
 	roomdelivery "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/room"
 	routedelivery "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/route"
 	scheduledelivery "github.com/GIT_USER_ID/GIT_REPO_ID/internal/delivery/http/schedule"
+	assistantexternal "github.com/GIT_USER_ID/GIT_REPO_ID/internal/external/http/assistant"
 	newsexternal "github.com/GIT_USER_ID/GIT_REPO_ID/internal/external/http/news"
 	scheduleexternal "github.com/GIT_USER_ID/GIT_REPO_ID/internal/external/http/schedule"
 	structureexternal "github.com/GIT_USER_ID/GIT_REPO_ID/internal/external/http/structure"
@@ -37,6 +39,7 @@ import (
 	schedulefilerepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/schedule/file"
 	schedulepgrepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/schedule/postgres"
 	structurerepository "github.com/GIT_USER_ID/GIT_REPO_ID/internal/repository/structure/postgres"
+	assistantusecase "github.com/GIT_USER_ID/GIT_REPO_ID/internal/usecase/assistant"
 	graphusecase "github.com/GIT_USER_ID/GIT_REPO_ID/internal/usecase/graph"
 	newsusecase "github.com/GIT_USER_ID/GIT_REPO_ID/internal/usecase/news"
 	placeusecase "github.com/GIT_USER_ID/GIT_REPO_ID/internal/usecase/place"
@@ -122,6 +125,8 @@ func main() {
 	routeUseCase := routeusecase.New(graphRepo, placeRepo)
 	scheduleUseCase := scheduleusecase.New(scheduleRepo)
 	roomUseCase := roomusecase.New(roomRepo)
+	assistantClient := assistantexternal.New(cfg.AssistantBaseURL, cfg.AssistantAPIKey, cfg.AssistantTimeout, nil)
+	assistantUseCase := assistantusecase.New(assistantClient, cfg.AssistantModel, cfg.AssistantContextMaxChars)
 
 	healthHandler := healthdelivery.NewHandler()
 	imageHandler := imagedelivery.NewHandler(cfg.RootImagePath)
@@ -145,6 +150,7 @@ func main() {
 		newsUseCase := newsusecase.New(nil, newsRepo)
 		newsListHandler = newsdelivery.NewListHandler(newsUseCase)
 	}
+	assistantChatHandler := assistantdelivery.NewChatHandler(assistantUseCase)
 
 	mux := http.NewServeMux()
 	mux.Handle("GET /health", healthHandler)
@@ -162,6 +168,7 @@ func main() {
 	mux.Handle("GET /rooms/{roomID}/schedule", roomGetScheduleHandler)
 	mux.Handle("POST /rooms/{roomID}/bookings", roomCreateBookingHandler)
 	mux.Handle("DELETE /rooms/bookings/{bookingID}", roomCancelBookingHandler)
+	mux.Handle("POST /assistant/chat", assistantChatHandler)
 
 	corsMiddleware := mid.CORS(nil)
 	handler := corsMiddleware(loggingMiddleware(mux))
