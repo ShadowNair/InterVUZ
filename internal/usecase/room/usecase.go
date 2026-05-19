@@ -14,6 +14,7 @@ const BookingDuration = 90 * time.Minute
 type Repository interface {
 	ListAvailability(ctx context.Context, filter domain.RoomAvailabilityFilter) ([]domain.RoomAvailability, error)
 	GetSchedule(ctx context.Context, roomID string, date time.Time) (*domain.RoomScheduleResponse, error)
+	ListBookings(ctx context.Context, date time.Time) ([]domain.RoomBooking, error)
 	CreateBooking(ctx context.Context, request domain.RoomBookingRequest) (*domain.RoomBooking, error)
 	CancelBooking(ctx context.Context, bookingID string) error
 }
@@ -54,6 +55,22 @@ func (uc *UseCase) GetSchedule(ctx context.Context, roomID string, date time.Tim
 	}
 
 	return uc.repository.GetSchedule(ctx, strings.TrimSpace(roomID), date)
+}
+
+func (uc *UseCase) ListBookings(ctx context.Context, date time.Time) (*domain.RoomBookingsResponse, error) {
+	if date.IsZero() {
+		return nil, errors.New("date is required")
+	}
+
+	items, err := uc.repository.ListBookings(ctx, date)
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.RoomBookingsResponse{
+		Date:  date.Format("2006-01-02"),
+		Items: items,
+	}, nil
 }
 
 func (uc *UseCase) CreateBooking(ctx context.Context, request domain.RoomBookingRequest) (*domain.RoomBooking, error) {

@@ -21,6 +21,10 @@ func (stub *repositoryStub) GetSchedule(context.Context, string, time.Time) (*do
 	return nil, nil
 }
 
+func (stub *repositoryStub) ListBookings(context.Context, time.Time) ([]domain.RoomBooking, error) {
+	return nil, nil
+}
+
 func (stub *repositoryStub) CreateBooking(context.Context, domain.RoomBookingRequest) (*domain.RoomBooking, error) {
 	return nil, nil
 }

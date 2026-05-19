@@ -270,6 +270,27 @@ paths:
                 $ref: '#/components/schemas/RoomScheduleResponse'
         '404':
           $ref: '#/components/responses/NotFound'
+  /bookings:
+    get:
+      tags: [Rooms]
+      summary: Получить забронированные аудитории на дату
+      parameters:
+        - in: query
+          name: date
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Дата в формате YYYY-MM-DD.
+      responses:
+        '200':
+          description: Брони аудиторий на дату
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomBookingsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
   /rooms/{roomId}/bookings:
     post:
       tags: [Rooms]
@@ -968,6 +989,17 @@ components:
         bookerContact:
           type: string
       required: [id, roomId, roomName, startsAt, endsAt, bookerName, bookerContact]
+    RoomBookingsResponse:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoomBooking'
+      required: [date, items]
     NewsResponse:
       type: object
       properties:

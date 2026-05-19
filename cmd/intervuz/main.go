@@ -140,6 +140,7 @@ func main() {
 	eventHandler := scheduledelivery.NewEventHandler(scheduleUseCase)
 	roomListAvailabilityHandler := roomdelivery.NewListAvailabilityHandler(roomUseCase)
 	roomGetScheduleHandler := roomdelivery.NewGetScheduleHandler(roomUseCase)
+	roomListBookingsHandler := roomdelivery.NewListBookingsHandler(roomUseCase)
 	roomCreateBookingHandler := roomdelivery.NewCreateBookingHandler(roomUseCase)
 	roomCancelBookingHandler := roomdelivery.NewCancelBookingHandler(roomUseCase)
 	var newsListHandler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
@@ -166,6 +167,7 @@ func main() {
 	mux.Handle("GET /users/schedule/{groupID}", groupScheduleHandler)
 	mux.Handle("GET /rooms/availability", roomListAvailabilityHandler)
 	mux.Handle("GET /rooms/{roomID}/schedule", roomGetScheduleHandler)
+	mux.Handle("GET /bookings", roomListBookingsHandler)
 	mux.Handle("POST /rooms/{roomID}/bookings", roomCreateBookingHandler)
 	mux.Handle("DELETE /rooms/bookings/{bookingID}", roomCancelBookingHandler)
 	mux.Handle("POST /assistant/chat", assistantChatHandler)

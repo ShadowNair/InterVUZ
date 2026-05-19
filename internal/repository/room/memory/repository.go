@@ -113,6 +113,44 @@ func (r *Repository) GetSchedule(_ context.Context, roomID string, date time.Tim
 	}, nil
 }
 
+func (r *Repository) ListBookings(_ context.Context, date time.Time) ([]domain.RoomBooking, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	dayStart, dayEnd := dayBounds(date)
+	items := make([]domain.RoomBooking, 0, len(r.bookings))
+	for _, booking := range r.bookings {
+		request := booking.request
+		if !domain.TimeRangesOverlap(request.StartsAt, request.EndsAt, dayStart, dayEnd) {
+			continue
+		}
+
+		room, ok := r.roomsByID[request.RoomID]
+		if !ok {
+			continue
+		}
+
+		items = append(items, domain.RoomBooking{
+			ID:            booking.id,
+			RoomID:        room.ID,
+			RoomName:      room.Name,
+			StartsAt:      request.StartsAt.Format(time.RFC3339),
+			EndsAt:        request.EndsAt.Format(time.RFC3339),
+			BookerName:    request.BookerName,
+			BookerContact: request.BookerContact,
+		})
+	}
+
+	sort.Slice(items, func(i, j int) bool {
+		if items[i].StartsAt != items[j].StartsAt {
+			return items[i].StartsAt < items[j].StartsAt
+		}
+		return items[i].RoomName < items[j].RoomName
+	})
+
+	return items, nil
+}
+
 func (r *Repository) CreateBooking(_ context.Context, request domain.RoomBookingRequest) (*domain.RoomBooking, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
