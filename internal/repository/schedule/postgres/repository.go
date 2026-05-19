@@ -33,41 +33,7 @@ func (r *Repository) Import(_ context.Context, request domain.ScheduleImportRequ
 
 func (r *Repository) GetGroupCatalog(ctx context.Context) (*domain.GroupCatalogResponse, error) {
 	query := `
-		WITH RECURSIVE valid_groups AS (
-			SELECT DISTINCT ag.external_uuid
-			FROM academic_groups ag
-			WHERE ag.external_uuid IS NOT NULL
-			  AND EXISTS (
-				SELECT 1
-				FROM schedule_sources ss
-				JOIN schedule_source_events sse ON sse.source_id = ss.id
-				WHERE ss.source_type = 'group_sync'
-				  AND ss.external_reference = ag.external_uuid
-			  )
-		), tree AS (
-			SELECT
-				su.external_uuid,
-				su.parent_external_uuid,
-				su.code,
-				su.name,
-				su.node_type,
-				su.course,
-				su.semester
-			FROM structure_units su
-			JOIN valid_groups vg ON vg.external_uuid = su.external_uuid
-			UNION
-			SELECT
-				parent.external_uuid,
-				parent.parent_external_uuid,
-				parent.code,
-				parent.name,
-				parent.node_type,
-				parent.course,
-				parent.semester
-			FROM structure_units parent
-			JOIN tree child ON child.parent_external_uuid = parent.external_uuid
-		)
-		SELECT DISTINCT
+		SELECT
 			external_uuid,
 			parent_external_uuid,
 			code,
@@ -75,32 +41,25 @@ func (r *Repository) GetGroupCatalog(ctx context.Context) (*domain.GroupCatalogR
 			node_type,
 			course,
 			semester
-		FROM tree
+		FROM structure_units
+		WHERE external_uuid IS NOT NULL
+		ORDER BY code, external_uuid
 	`
 	args := []any{}
 	if r.targetRootExternal != "" {
 		query = `
 			WITH RECURSIVE descendants AS (
-				SELECT external_uuid
+				SELECT
+					external_uuid,
+					parent_external_uuid,
+					code,
+					name,
+					node_type,
+					course,
+					semester
 				FROM structure_units
 				WHERE external_uuid = $1
 				UNION ALL
-				SELECT su.external_uuid
-				FROM structure_units su
-				JOIN descendants d ON su.parent_external_uuid = d.external_uuid
-			), valid_groups AS (
-				SELECT DISTINCT ag.external_uuid
-				FROM academic_groups ag
-				JOIN descendants d ON d.external_uuid = ag.external_uuid
-				WHERE ag.external_uuid IS NOT NULL
-				  AND EXISTS (
-					SELECT 1
-					FROM schedule_sources ss
-					JOIN schedule_source_events sse ON sse.source_id = ss.id
-					WHERE ss.source_type = 'group_sync'
-					  AND ss.external_reference = ag.external_uuid
-				  )
-			), tree AS (
 				SELECT
 					su.external_uuid,
 					su.parent_external_uuid,
@@ -110,20 +69,9 @@ func (r *Repository) GetGroupCatalog(ctx context.Context) (*domain.GroupCatalogR
 					su.course,
 					su.semester
 				FROM structure_units su
-				JOIN valid_groups vg ON vg.external_uuid = su.external_uuid
-				UNION
-				SELECT
-					parent.external_uuid,
-					parent.parent_external_uuid,
-					parent.code,
-					parent.name,
-					parent.node_type,
-					parent.course,
-					parent.semester
-				FROM structure_units parent
-				JOIN tree child ON child.parent_external_uuid = parent.external_uuid
+				JOIN descendants d ON su.parent_external_uuid = d.external_uuid
 			)
-			SELECT DISTINCT
+			SELECT
 				external_uuid,
 				parent_external_uuid,
 				code,
@@ -131,7 +79,8 @@ func (r *Repository) GetGroupCatalog(ctx context.Context) (*domain.GroupCatalogR
 				node_type,
 				course,
 				semester
-			FROM tree
+			FROM descendants
+			ORDER BY code, external_uuid
 		`
 		args = append(args, r.targetRootExternal)
 	}
@@ -153,8 +102,6 @@ func (r *Repository) GetGroupCatalog(ctx context.Context) (*domain.GroupCatalogR
 	}
 
 	nodes := make(map[string]*domain.GroupCatalogNode)
-	childrenByParent := make(map[string][]*domain.GroupCatalogNode)
-	rootCandidates := make([]*domain.GroupCatalogNode, 0, 4)
 
 	for rows.Next() {
 		var row dbNode
@@ -195,37 +142,7 @@ func (r *Repository) GetGroupCatalog(ctx context.Context) (*domain.GroupCatalogR
 		return &domain.GroupCatalogResponse{Data: domain.GroupCatalogNode{}}, nil
 	}
 
-	for _, node := range nodes {
-		parentUUID := strings.TrimSpace(node.ParentUUID)
-		if parentUUID == "" {
-			rootCandidates = append(rootCandidates, node)
-			continue
-		}
-
-		parent, ok := nodes[parentUUID]
-		if !ok {
-			rootCandidates = append(rootCandidates, node)
-			continue
-		}
-
-		childrenByParent[parent.UUID] = append(childrenByParent[parent.UUID], node)
-	}
-
-	for parentUUID, children := range childrenByParent {
-		sort.Slice(children, func(i, j int) bool {
-			return catalogNodeLess(*children[i], *children[j])
-		})
-		nodes[parentUUID].Children = make([]domain.GroupCatalogNode, 0, len(children))
-		for _, child := range children {
-			nodes[parentUUID].Children = append(nodes[parentUUID].Children, *child)
-		}
-	}
-
-	sort.Slice(rootCandidates, func(i, j int) bool {
-		return catalogNodeLess(*rootCandidates[i], *rootCandidates[j])
-	})
-
-	return &domain.GroupCatalogResponse{Data: *rootCandidates[0]}, nil
+	return &domain.GroupCatalogResponse{Data: buildCatalogRoot(nodes)}, nil
 }
 
 func (r *Repository) GetGroupSchedule(ctx context.Context, groupID string) (*domain.GroupScheduleResponse, error) {
@@ -1141,6 +1058,82 @@ func replaceEventAudienceLinks(ctx context.Context, tx *sql.Tx, eventID string, 
 	}
 
 	return nil
+}
+
+func buildCatalogRoot(nodes map[string]*domain.GroupCatalogNode) domain.GroupCatalogNode {
+	childrenByParent := make(map[string][]*domain.GroupCatalogNode)
+	rootCandidates := make([]*domain.GroupCatalogNode, 0, 4)
+
+	for _, node := range nodes {
+		node.Children = nil
+	}
+
+	for _, node := range nodes {
+		parentUUID := strings.TrimSpace(node.ParentUUID)
+		if parentUUID == "" {
+			rootCandidates = append(rootCandidates, node)
+			continue
+		}
+
+		parent, ok := nodes[parentUUID]
+		if !ok {
+			rootCandidates = append(rootCandidates, node)
+			continue
+		}
+
+		childrenByParent[parent.UUID] = append(childrenByParent[parent.UUID], node)
+	}
+
+	sort.Slice(rootCandidates, func(i, j int) bool {
+		return catalogNodeLess(*rootCandidates[i], *rootCandidates[j])
+	})
+
+	prunedRoots := make([]domain.GroupCatalogNode, 0, len(rootCandidates))
+	for _, root := range rootCandidates {
+		prunedRoot, keep := buildCatalogNode(root, childrenByParent)
+		if keep {
+			prunedRoots = append(prunedRoots, prunedRoot)
+		}
+	}
+
+	if len(prunedRoots) == 0 {
+		return domain.GroupCatalogNode{}
+	}
+	if len(prunedRoots) == 1 {
+		return prunedRoots[0]
+	}
+
+	return domain.GroupCatalogNode{
+		Abbr:     "groups",
+		Name:     "Groups",
+		NodeType: "container",
+		Children: prunedRoots,
+	}
+}
+
+func buildCatalogNode(node *domain.GroupCatalogNode, childrenByParent map[string][]*domain.GroupCatalogNode) (domain.GroupCatalogNode, bool) {
+	children := childrenByParent[node.UUID]
+	sort.Slice(children, func(i, j int) bool {
+		return catalogNodeLess(*children[i], *children[j])
+	})
+
+	result := *node
+	result.Children = make([]domain.GroupCatalogNode, 0, len(children))
+	for _, child := range children {
+		childNode, keep := buildCatalogNode(child, childrenByParent)
+		if keep {
+			result.Children = append(result.Children, childNode)
+		}
+	}
+
+	if result.NodeType == "group" {
+		return result, true
+	}
+	if len(result.Children) == 0 {
+		return result, false
+	}
+
+	return result, true
 }
 
 func catalogNodeLess(a, b domain.GroupCatalogNode) bool {
