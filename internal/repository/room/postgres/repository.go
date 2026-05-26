@@ -108,6 +108,59 @@ func (r *Repository) GetSchedule(ctx context.Context, roomID string, date time.T
 	}, nil
 }
 
+func (r *Repository) ListBookings(ctx context.Context, date time.Time) ([]domain.RoomBooking, error) {
+	dayStart, dayEnd := dayBounds(date)
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT
+			id::text,
+			place_id,
+			room_name,
+			starts_at,
+			ends_at,
+			booker_name,
+			booker_contact
+		FROM room_bookings
+		WHERE starts_at < $2
+		  AND ends_at > $1
+		ORDER BY starts_at, room_name
+	`, dayStart, dayEnd)
+	if err != nil {
+		return nil, fmt.Errorf("query room bookings: %w", err)
+	}
+	defer rows.Close()
+
+	items := make([]domain.RoomBooking, 0, 16)
+	for rows.Next() {
+		var (
+			id            string
+			roomID        string
+			roomName      string
+			startsAt      time.Time
+			endsAt        time.Time
+			bookerName    string
+			bookerContact string
+		)
+		if err := rows.Scan(&id, &roomID, &roomName, &startsAt, &endsAt, &bookerName, &bookerContact); err != nil {
+			return nil, fmt.Errorf("scan room booking: %w", err)
+		}
+
+		items = append(items, domain.RoomBooking{
+			ID:            id,
+			RoomID:        roomID,
+			RoomName:      roomName,
+			StartsAt:      startsAt.Format(time.RFC3339),
+			EndsAt:        endsAt.Format(time.RFC3339),
+			BookerName:    bookerName,
+			BookerContact: bookerContact,
+		})
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate room bookings: %w", err)
+	}
+
+	return items, nil
+}
+
 func (r *Repository) CreateBooking(ctx context.Context, request domain.RoomBookingRequest) (*domain.RoomBooking, error) {
 	room, ok := r.roomsByID[request.RoomID]
 	if !ok {

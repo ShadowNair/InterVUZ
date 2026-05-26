@@ -231,6 +231,11 @@ type RoomBooking struct {
 	BookerContact string `json:"bookerContact"`
 }
 
+type RoomBookingsResponse struct {
+	Date  string        `json:"date"`
+	Items []RoomBooking `json:"items"`
+}
+
 type ErrorResponse struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`

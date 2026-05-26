@@ -115,3 +115,60 @@ func TestCancelBookingReleasesRoom(t *testing.T) {
 		t.Fatalf("expected room to become available, got %d items", len(items))
 	}
 }
+
+func TestListBookingsReturnsBookingsForDate(t *testing.T) {
+	repository := New([]domain.Place{
+		{
+			ID:   "place_100",
+			Name: "Аудитория 100",
+			Type: "classroom",
+			Coordinates: domain.Coordinates{
+				Building: "1",
+				Floor:    1,
+			},
+		},
+		{
+			ID:   "place_200",
+			Name: "Аудитория 200",
+			Type: "classroom",
+			Coordinates: domain.Coordinates{
+				Building: "1",
+				Floor:    2,
+			},
+		},
+	})
+
+	targetDate := time.Date(2026, time.May, 18, 0, 0, 0, 0, time.UTC)
+	firstStart := targetDate.Add(10 * time.Hour)
+	secondStart := targetDate.AddDate(0, 0, 1).Add(10 * time.Hour)
+
+	if _, err := repository.CreateBooking(context.Background(), domain.RoomBookingRequest{
+		RoomID:        "place_100",
+		StartsAt:      firstStart,
+		EndsAt:        firstStart.Add(90 * time.Minute),
+		BookerName:    "Student",
+		BookerContact: "student@example.com",
+	}); err != nil {
+		t.Fatalf("create target booking: %v", err)
+	}
+	if _, err := repository.CreateBooking(context.Background(), domain.RoomBookingRequest{
+		RoomID:        "place_200",
+		StartsAt:      secondStart,
+		EndsAt:        secondStart.Add(90 * time.Minute),
+		BookerName:    "Teacher",
+		BookerContact: "teacher@example.com",
+	}); err != nil {
+		t.Fatalf("create other booking: %v", err)
+	}
+
+	items, err := repository.ListBookings(context.Background(), targetDate)
+	if err != nil {
+		t.Fatalf("list bookings: %v", err)
+	}
+	if len(items) != 1 {
+		t.Fatalf("expected one booking, got %d", len(items))
+	}
+	if items[0].RoomID != "place_100" {
+		t.Fatalf("expected place_100 booking, got %s", items[0].RoomID)
+	}
+}
