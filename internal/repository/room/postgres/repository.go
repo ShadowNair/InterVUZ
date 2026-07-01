@@ -86,7 +86,11 @@ func (r *Repository) ListAvailability(ctx context.Context, filter domain.RoomAva
 func (r *Repository) GetSchedule(ctx context.Context, roomID string, date time.Time) (*domain.RoomScheduleResponse, error) {
 	room, ok := r.roomsByID[roomID]
 	if !ok {
-		return nil, domain.ErrNotFound
+		var found bool
+		room, found = domain.SyntheticClassroomFromPlaceID(roomID)
+		if !found {
+			return nil, domain.ErrNotFound
+		}
 	}
 
 	items, err := r.loadScheduleEvents(ctx, room, date)
