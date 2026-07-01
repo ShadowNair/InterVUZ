@@ -29,3 +29,28 @@ func normalizeToken(value string) string {
 
 	return builder.String()
 }
+
+func SyntheticClassroomFromPlaceID(roomID string) (Place, bool) {
+	const prefix = "place_"
+	roomID = strings.TrimSpace(roomID)
+	if !strings.HasPrefix(roomID, prefix) {
+		return Place{}, false
+	}
+
+	token := strings.TrimPrefix(roomID, prefix)
+	if token == "" {
+		return Place{}, false
+	}
+
+	label := strings.ReplaceAll(token, "_", "/")
+
+	return Place{
+		ID:           roomID,
+		Name:         "Аудитория " + label,
+		Type:         "classroom",
+		Description:  "Учебная аудитория",
+		Coordinates:  Coordinates{Building: "B1"},
+		Tags:         []string{"lecture"},
+		IsAccessible: true,
+	}, true
+}

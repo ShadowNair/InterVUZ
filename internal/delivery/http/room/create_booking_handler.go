@@ -48,9 +48,9 @@ func (h *CreateBookingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		switch {
 		case errors.Is(err, domain.ErrNotFound):
-			httpjson.WriteError(w, http.StatusNotFound, "not_found", "room not found")
+			httpjson.WriteError(w, http.StatusNotFound, "not_found", "Комната не найдена")
 		case errors.Is(err, domain.ErrConflict):
-			httpjson.WriteError(w, http.StatusConflict, "conflict", "room is busy for this time")
+			httpjson.WriteError(w, http.StatusConflict, "conflict", "Комната занята в это время")
 		default:
 			httpjson.WriteError(w, http.StatusBadRequest, "bad_request", err.Error())
 		}

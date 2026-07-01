@@ -80,7 +80,11 @@ func (r *Repository) GetSchedule(_ context.Context, roomID string, date time.Tim
 
 	room, ok := r.roomsByID[roomID]
 	if !ok {
-		return nil, domain.ErrNotFound
+		var found bool
+		room, found = domain.SyntheticClassroomFromPlaceID(roomID)
+		if !found {
+			return nil, domain.ErrNotFound
+		}
 	}
 
 	dayStart, dayEnd := dayBounds(date)
